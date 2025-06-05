@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import barbershopService from "@/lib/api/route-api";
 
 const formSchema = z.object({
   nome: z.string().min(2, {
@@ -54,6 +56,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function BarbershopRegisterForm() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -93,9 +97,25 @@ export default function BarbershopRegisterForm() {
     }
   };
 
-  function onSubmit(values: FormValues) {
-    console.log(values);
-    alert("Barbearia cadastrada com sucesso!");
+  async function onSubmit(values: FormValues) {
+    setIsLoading(true);
+
+    try {
+      const response = await barbershopService.create(values);
+
+      console.log("Barbearia cadastrada:", response);
+
+      form.reset();
+
+      alert("Barbearia cadastrada com sucesso!");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro desconhecido";
+      alert(`Erro: ${errorMessage}`);
+      console.error("Erro ao cadastrar:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -131,7 +151,8 @@ export default function BarbershopRegisterForm() {
                           <FormLabel>Nome da Barbearia</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="Ex: Barbearia Elite"
+                              placeholder="Ex: Barbearia Kaue"
+                              disabled={isLoading}
                               {...field}
                             />
                           </FormControl>
@@ -148,7 +169,8 @@ export default function BarbershopRegisterForm() {
                           <FormLabel>Área de Atendimento</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="Ex: Salão de Beleza, Barbearia, Estética"
+                              placeholder="Ex: Estética, Barbearia, Salão de Beleza"
+                              disabled={isLoading}
                               {...field}
                             />
                           </FormControl>
@@ -177,6 +199,7 @@ export default function BarbershopRegisterForm() {
                             <Input
                               type="email"
                               placeholder="seu@email.com"
+                              disabled={isLoading}
                               {...field}
                             />
                           </FormControl>
@@ -195,6 +218,7 @@ export default function BarbershopRegisterForm() {
                             <Input
                               type="password"
                               placeholder="••••••••"
+                              disabled={isLoading}
                               {...field}
                             />
                           </FormControl>
@@ -223,6 +247,7 @@ export default function BarbershopRegisterForm() {
                             <FormControl>
                               <Input
                                 placeholder="00000-000"
+                                disabled={isLoading}
                                 {...field}
                                 onChange={(e) => {
                                   field.onChange(e);
@@ -245,7 +270,11 @@ export default function BarbershopRegisterForm() {
                           <FormItem>
                             <FormLabel>Estado</FormLabel>
                             <FormControl>
-                              <Input placeholder="SP" {...field} />
+                              <Input
+                                placeholder="SP"
+                                disabled={isLoading}
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -259,7 +288,11 @@ export default function BarbershopRegisterForm() {
                           <FormItem>
                             <FormLabel>Cidade</FormLabel>
                             <FormControl>
-                              <Input placeholder="São Paulo" {...field} />
+                              <Input
+                                placeholder="São Paulo"
+                                disabled={isLoading}
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -275,7 +308,11 @@ export default function BarbershopRegisterForm() {
                           <FormItem>
                             <FormLabel>Bairro</FormLabel>
                             <FormControl>
-                              <Input placeholder="Centro" {...field} />
+                              <Input
+                                placeholder="Centro"
+                                disabled={isLoading}
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -289,7 +326,11 @@ export default function BarbershopRegisterForm() {
                           <FormItem>
                             <FormLabel>Logradouro</FormLabel>
                             <FormControl>
-                              <Input placeholder="Rua das Flores" {...field} />
+                              <Input
+                                placeholder="Rua das Flores"
+                                disabled={isLoading}
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -305,7 +346,11 @@ export default function BarbershopRegisterForm() {
                           <FormItem>
                             <FormLabel>Número</FormLabel>
                             <FormControl>
-                              <Input placeholder="123" {...field} />
+                              <Input
+                                placeholder="123"
+                                disabled={isLoading}
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -321,6 +366,7 @@ export default function BarbershopRegisterForm() {
                             <FormControl>
                               <Input
                                 placeholder="Sala 2 (opcional)"
+                                disabled={isLoading}
                                 {...field}
                               />
                             </FormControl>
@@ -337,8 +383,9 @@ export default function BarbershopRegisterForm() {
                     type="submit"
                     className="w-full bg-blue-600 text-white hover:bg-blue-700"
                     size="lg"
+                    disabled={isLoading}
                   >
-                    Cadastrar Barbearia
+                    {isLoading ? "Cadastrando..." : "Cadastrar Barbearia"}
                   </Button>
                 </div>
               </form>
