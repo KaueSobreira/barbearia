@@ -8,6 +8,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 const Home = () => {
   const barbershops = [
@@ -99,50 +100,52 @@ const Home = () => {
           {barbershops.map((shop) => (
             <Card
               key={shop.id}
-              className="flex-shrink-0 overflow-hidden border-0 shadow-lg"
+              className="flex-shrink-0 overflow-hidden border-0 !bg-transparent shadow-lg"
             >
               {/* celular */}
-              <div className="w-[280px] rounded-2xl bg-black text-white md:hidden">
-                <CardContent className="p-5">
+              <div className="w-[200px] rounded-2xl bg-gray-900 text-white shadow-lg md:hidden">
+                <div className="p-4">
                   <div className="mb-3 flex justify-center">
-                    <div className="relative h-25 w-25">
-                      <img
+                    <div className="relative h-16 w-16">
+                      <Image
                         src={shop.image}
                         alt={shop.name}
                         className="h-full w-full rounded-full border-3 border-white object-cover shadow-lg"
+                        width={500}
+                        height={500}
                       />
                     </div>
                   </div>
 
-                  <h3 className="mb-2 text-center text-base font-semibold text-white">
+                  <h3 className="mb-2 text-center text-sm font-semibold text-white">
                     {shop.name}
                   </h3>
 
-                  <div className="mb-3 flex justify-center">
-                    <Badge className="bg-blue-600 px-3 py-1 text-xs text-white">
+                  <div className="mb-2 flex justify-center">
+                    <Badge className="bg-blue-600 px-2 py-1 text-xs text-white">
                       {shop.city}
                     </Badge>
                   </div>
 
-                  <p className="mb-3 text-center text-xs text-gray-300">
+                  <p className="mb-2 text-center text-xs text-gray-300">
                     {shop.address}
                   </p>
 
-                  <div className="mb-4 flex items-center justify-center">
+                  <div className="mb-3 flex items-center justify-center">
                     <div className="flex text-xs text-yellow-400">
                       ⭐⭐⭐⭐⭐
                     </div>
-                    <span className="ml-2 text-xs text-gray-300">
+                    <span className="ml-1 text-xs text-gray-300">
                       ({shop.rating})
                     </span>
                   </div>
-                </CardContent>
+                </div>
 
-                <CardFooter className="p-5 pt-0">
-                  <Button className="w-full bg-blue-600 text-sm text-white hover:bg-blue-700">
+                <div className="p-4 pt-0">
+                  <Button className="w-full bg-blue-600 py-2 text-xs text-white hover:bg-blue-700">
                     Agendar
                   </Button>
-                </CardFooter>
+                </div>
               </div>
 
               {/* pc */}
