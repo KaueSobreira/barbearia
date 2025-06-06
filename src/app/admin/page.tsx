@@ -2,15 +2,20 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { Eye, EyeOff, LogIn, Mail, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff, LogIn, Mail, Lock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { authService } from "@/lib/api/auth";
 
 const LoginPage = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -20,12 +25,38 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    // Simula uma requisição de login
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const response = await authService.login({
+        email: formData.email,
+        password: formData.password,
+      });
 
-    console.log("Login data:", formData);
-    setIsLoading(false);
+      // Salva os dados da barbearia
+      authService.saveAuth(response.barberShop);
+
+      console.log("Login realizado com sucesso!", response.barberShop);
+
+      router.push("/dashboard");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      console.error("Erro no login:", err);
+
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.response?.status === 401) {
+        setError("Email ou senha incorretos");
+      } else if (err.response?.status === 400) {
+        setError("Dados inválidos. Verifique email e senha.");
+      } else if (err.response?.status >= 500) {
+        setError("Erro interno do servidor. Tente novamente.");
+      } else {
+        setError("Erro ao conectar com o servidor");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -33,6 +64,7 @@ const LoginPage = () => {
       ...prev,
       [field]: value,
     }));
+    if (error) setError("");
   };
 
   return (
@@ -46,6 +78,8 @@ const LoginPage = () => {
               height={39}
               alt="Financeiro"
               className="mx-auto mb-8"
+              priority
+              style={{ width: "auto", height: "auto" }}
             />
           </div>
 
@@ -57,6 +91,13 @@ const LoginPage = () => {
               Digite suas credenciais para acessar o painel administrativo
             </p>
           </div>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
@@ -71,6 +112,7 @@ const LoginPage = () => {
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   className="pl-10"
                   required
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -89,6 +131,7 @@ const LoginPage = () => {
                   }
                   className="pr-10 pl-10"
                   required
+                  disabled={isLoading}
                 />
                 <Button
                   type="button"
@@ -96,6 +139,7 @@ const LoginPage = () => {
                   size="sm"
                   className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="text-muted-foreground h-4 w-4" />
@@ -114,6 +158,7 @@ const LoginPage = () => {
                   onCheckedChange={(checked) =>
                     handleInputChange("rememberMe", checked as boolean)
                   }
+                  disabled={isLoading}
                 />
                 <Label
                   htmlFor="remember"
@@ -122,15 +167,20 @@ const LoginPage = () => {
                   Lembrar de mim
                 </Label>
               </div>
-              <Button variant="link" className="px-0 text-sm">
+              <Button
+                variant="link"
+                className="px-0 text-sm"
+                type="button"
+                disabled={isLoading}
+              >
                 Esqueceu a senha?
               </Button>
             </div>
 
             <Button
               type="submit"
-              className="w-full text-white"
-              disabled={isLoading}
+              className="w-full"
+              disabled={isLoading || !formData.email || !formData.password}
             >
               {isLoading ? (
                 <>
@@ -139,12 +189,18 @@ const LoginPage = () => {
                 </>
               ) : (
                 <>
-                  <LogIn className="mr-2 h-4 w-4 text-white" />
+                  <LogIn className="mr-2 h-4 w-4" />
                   Fazer Login
                 </>
               )}
             </Button>
           </form>
+
+          <div className="text-center">
+            <p className="text-muted-foreground text-xs">
+              Acesso restrito a administradores autorizados
+            </p>
+          </div>
         </div>
       </div>
 
@@ -156,6 +212,7 @@ const LoginPage = () => {
           fill
           className="object-cover"
           priority
+          sizes="50vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute bottom-8 left-8 text-white">
