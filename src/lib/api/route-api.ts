@@ -40,7 +40,10 @@ export interface BarbershopResponse {
 export const barbershopService = {
   async create(data: BarbershopData): Promise<BarbershopResponse> {
     try {
-      const response = await api.post<BarbershopResponse>("/barbearias", data);
+      const response = await api.post<BarbershopResponse>(
+        "/barbearias/register",
+        data,
+      );
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
