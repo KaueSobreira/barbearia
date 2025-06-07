@@ -33,7 +33,6 @@ const LoginPage = () => {
         password: formData.password,
       });
 
-      // Salva os dados da barbearia
       authService.saveAuth(response.barberShop);
 
       console.log("Login realizado com sucesso!", response.barberShop);

@@ -1,7 +1,6 @@
-// lib/api/barbershop.ts
 import axios from "axios";
+import { BarbershopData, BarbershopResponse } from "../model/barbearia";
 
-// Configuração base do Axios
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333",
   headers: {
@@ -16,26 +15,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
-
-export interface BarbershopData {
-  nome: string;
-  email: string;
-  senha: string;
-  area_atendimento: string;
-  CEP: string;
-  estado: string;
-  cidade: string;
-  bairro: string;
-  logradouro: string;
-  numero: string;
-  complemento?: string;
-}
-
-export interface BarbershopResponse {
-  id: string;
-  nome: string;
-  email: string;
-}
 
 export const barbershopService = {
   async create(data: BarbershopData): Promise<BarbershopResponse> {
