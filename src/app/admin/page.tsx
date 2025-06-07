@@ -179,7 +179,7 @@ const LoginPage = () => {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full text-white"
               disabled={isLoading || !formData.email || !formData.password}
             >
               {isLoading ? (
@@ -189,7 +189,7 @@ const LoginPage = () => {
                 </>
               ) : (
                 <>
-                  <LogIn className="mr-2 h-4 w-4" />
+                  <LogIn className="mr-2 h-4 w-4 text-white" />
                   Fazer Login
                 </>
               )}

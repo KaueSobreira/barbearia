@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/lib/api/auth";
+import { Sidebar } from "./_components/sidebar";
 
 interface ProtectedLayoutProps {
   children: React.ReactNode;
@@ -28,5 +29,12 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="bg-background flex h-screen">
+      <Sidebar />
+      <main className="flex-1 overflow-y-auto">
+        <div className="container mx-auto p-6">{children}</div>
+      </main>
+    </div>
+  );
 }
