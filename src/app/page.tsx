@@ -15,8 +15,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { barbeariaService } from "@/lib/api/list-barbearia";
+import Link from "next/link";
 
 const Home = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [barbearias, setBarbearias] = useState<any[]>([]);
   const [filteredBarbearias, setFilteredBarbearias] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -172,8 +174,11 @@ const Home = () => {
                   </div>
 
                   <div className="p-4 pt-0">
-                    <Button className="w-full bg-blue-600 py-2 text-xs text-white hover:bg-blue-700">
-                      Agendar
+                    <Button
+                      asChild
+                      className="w-full bg-blue-600 py-2 text-xs text-white hover:bg-blue-700"
+                    >
+                      <Link href={`/barbearias/${shop.id}`}>Agendar</Link>
                     </Button>
                   </div>
                 </div>
@@ -203,7 +208,6 @@ const Home = () => {
                       {shop.logradouro}, {shop.numero} - {shop.bairro}
                     </p>
 
-                    {/* Rating */}
                     <div className="mb-4 flex items-center">
                       <div className="flex text-yellow-400">⭐⭐⭐⭐⭐</div>
                       <span className="ml-2 text-gray-600">
@@ -217,8 +221,13 @@ const Home = () => {
                   </CardContent>
 
                   <CardFooter className="p-6 pt-0">
-                    <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">
-                      Agendar Horário
+                    <Button
+                      asChild
+                      className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                    >
+                      <Link href={`/barbearias/${shop.id}`}>
+                        Agendar Horário
+                      </Link>
                     </Button>
                   </CardFooter>
                 </div>
