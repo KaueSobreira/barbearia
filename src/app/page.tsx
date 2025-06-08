@@ -16,6 +16,7 @@ import { Loader2, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { barbeariaService } from "@/lib/api/list-barbearia";
 import Link from "next/link";
+import Header from "@/components/header";
 
 const Home = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,7 +76,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
+      <Header />
       {/* Header */}
+
       <div className="flex flex-col items-center justify-center p-4 pt-8">
         <h1 className="pb-6 text-4xl font-bold">Barberia</h1>
 
