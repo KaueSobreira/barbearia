@@ -80,7 +80,7 @@ const Home = () => {
       {/* Header */}
 
       <div className="flex flex-col items-center justify-center p-4 pt-8">
-        <h1 className="pb-6 text-4xl font-bold">Barberia</h1>
+        {/* <h1 className="pb-6 text-4xl font-bold">Barberia</h1> */}
 
         <Input
           className="mb-6 max-w-sm rounded-full border-gray-300 text-center focus:border-blue-500"
@@ -93,12 +93,15 @@ const Home = () => {
       {error && (
         <div className="mx-auto mb-4 max-w-md px-4">
           <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            {/* <AlertCircle className="h-4 w-4" /> */}
+            {/* <AlertDescription>{error}</AlertDescription> */}
           </Alert>
         </div>
       )}
-
+      <div className="pb-5 pl-10 font-bold text-gray-300">
+        <h1>Kaue Sobreira Lucena</h1>
+        <p className="text-sm font-semibold">Domingo, 08 Junho de 2025</p>
+      </div>
       <div className="mx-auto w-full max-w-7xl px-4">
         <h2 className="mb-4 text-center text-2xl font-bold text-gray-600">
           Meus Favoritos
