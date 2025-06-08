@@ -4,6 +4,7 @@ import { Sheet, SheetTrigger } from "./ui/sheet";
 import { Button } from "./ui/button";
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
+import SiderMenu from "./Sidermenu";
 
 const Header = () => {
   return (
@@ -24,6 +25,7 @@ const Header = () => {
               <MenuIcon />
             </Button>
           </SheetTrigger>
+          <SiderMenu />
         </Sheet>
       </CardContent>
     </Card>

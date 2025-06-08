@@ -93,8 +93,8 @@ const Home = () => {
       {error && (
         <div className="mx-auto mb-4 max-w-md px-4">
           <Alert variant="destructive">
-            {/* <AlertCircle className="h-4 w-4" /> */}
-            {/* <AlertDescription>{error}</AlertDescription> */}
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         </div>
       )}
