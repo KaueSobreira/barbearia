@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from "axios";
 
 const api = axios.create({
@@ -8,106 +7,56 @@ const api = axios.create({
   },
 });
 
-export interface Servico {
+export interface ServicoData {
+  nome: string;
+  descricao: string;
+  preco: number;
+  barberShopId: string;
+}
+
+export interface ServicoResponse {
   id: string;
   nome: string;
   descricao: string;
   preco: number;
   barberShopId: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
 }
 
-// Dados de exemplo para desenvolvimento
-const servicosMock: Servico[] = [
-  {
-    id: "1",
-    nome: "Corte",
-    descricao: "Corte clássico",
-    preco: 25.0,
-    barberShopId: "default",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    nome: "Corte + Barba",
-    descricao: "Corte completo",
-    preco: 45.0,
-    barberShopId: "default",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    nome: "Barba Completa",
-    descricao: "Aparar",
-    preco: 20.0,
-    barberShopId: "default",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "4",
-    nome: "Sobrancelha Masculina",
-    descricao: "Aparar",
-    preco: 15.0,
-    barberShopId: "default",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "5",
-    nome: "Tratamento Capilar",
-    descricao: "Hidratação e cuidados",
-    preco: 35.0,
-    barberShopId: "default",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "6",
-    nome: "Corte Infantil",
-    descricao: "Corte especial",
-    preco: 20.0,
-    barberShopId: "default",
-    createdAt: new Date().toISOString(),
-  },
-];
-
-export const servicoService = {
-  async getServicosByBarbearia(barberShopId: string): Promise<Servico[]> {
+export const servicoApiService = {
+  async createServico(data: ServicoData): Promise<ServicoResponse> {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log(`🔄 Mock: Buscando serviços para barbearia ${barberShopId}`);
+      console.log("Criando serviço:", data);
 
-      return servicosMock.map((servico) => ({
-        ...servico,
-        barberShopId,
-      }));
+      const response = await api.post<ServicoResponse>(
+        "/barbearias/servicos",
+        data,
+      );
+
+      console.log("Serviço criado com sucesso:", response.data);
+      return response.data;
     } catch (error) {
-      console.error("Erro ao buscar serviços:", error);
-    }
-  },
+      if (axios.isAxiosError(error)) {
+        console.error("Erro ao criar serviço:", {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message,
+        });
 
-  async createServico(
-    data: Omit<Servico, "id" | "createdAt">,
-  ): Promise<Servico> {
-    try {
-      const novoServico: Servico = {
-        ...data,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
-      };
-
-      return novoServico;
-    } catch (error) {
-      console.error("Erro ao criar serviço:", error);
-      throw error;
-    }
-  },
-
-  async getAllServicos(): Promise<Servico[]> {
-    try {
-      return servicosMock;
-    } catch (error) {
-      console.error("Erro ao buscar todos os serviços:", error);
-      return servicosMock;
+        if (error.response?.status === 400) {
+          throw new Error("Dados inválidos. Verifique os campos preenchidos.");
+        }
+        if (error.response?.status === 401) {
+          throw new Error("Não autorizado. Faça login novamente.");
+        }
+        if (error.response?.status === 404) {
+          throw new Error("Barbearia não encontrada.");
+        }
+        if (error.response?.status === 500) {
+          throw new Error("Erro interno do servidor. Tente novamente.");
+        }
+      }
+      throw new Error("Erro ao criar serviço. Tente novamente.");
     }
   },
 };

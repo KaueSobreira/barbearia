@@ -58,7 +58,7 @@ const menuItems: MenuItem[] = [
       {
         title: "Cadastro de Serviços",
         icon: Scissors,
-        href: "/dashboard/cadastros/servicos",
+        href: "/servicos",
       },
       {
         title: "Cadastro de Funcionários",
