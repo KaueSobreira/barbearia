@@ -1,5 +1,11 @@
 // lib/api/list-servico.ts
 import axios from "axios";
+import {
+  Servico,
+  ServicoApiResponse,
+  ServicoData,
+  ServicoResponse,
+} from "../model/servico";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333",
@@ -7,42 +13,6 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
-
-export interface Servico {
-  id: string;
-  nome: string;
-  descricao: string;
-  preco: number;
-  barberShopId: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface ServicoData {
-  nome: string;
-  descricao: string;
-  preco: number;
-  barberShopId: string;
-}
-
-export interface ServicoResponse {
-  id: string;
-  nome: string;
-  descricao: string;
-  preco: number;
-  barberShopId: string;
-  createdAt: string;
-}
-
-interface ServicoApiResponse {
-  id: string;
-  nome: string;
-  descricao: string;
-  preco: string | number;
-  barberShopId: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
 
 export const servicoService = {
   async getServicosByBarbearia(barberShopId: string): Promise<Servico[]> {

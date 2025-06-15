@@ -14,12 +14,13 @@ import {
   CalendarIcon,
 } from "lucide-react";
 import { barbeariaService } from "@/lib/api/list-barbearia";
-import { servicoService, Servico } from "@/lib/api/list-servico";
+import { servicoService } from "@/lib/api/list-servico";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import SiderMenu from "@/components/Sidermenu";
 import ServiceItem from "./_components/serviceItem";
+import { Servico } from "@/lib/model/servico";
 
 const HomeBarbearia = () => {
   const params = useParams();
@@ -182,11 +183,6 @@ const HomeBarbearia = () => {
           <h2 className="text-muted-foreground text-xs font-bold uppercase">
             Serviços Disponíveis
           </h2>
-          {servicos.length > 0 && (
-            <Badge variant="outline" className="text-xs">
-              {servicos.length} {servicos.length === 1 ? "serviço" : "serviços"}
-            </Badge>
-          )}
         </div>
 
         {servicosLoading ? (

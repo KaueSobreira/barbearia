@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Servico } from "@/lib/api/list-servico";
+import { Servico } from "@/lib/model/servico";
 import { CalendarIcon } from "lucide-react";
 
 const ServiceItem = ({
@@ -22,7 +22,6 @@ const ServiceItem = ({
     console.log(
       `Agendando serviço: ${servico.nome} na barbearia: ${barbearia?.nome}`,
     );
-    alert(`Em breve: Agendamento para ${servico.nome}`);
   };
 
   return (
