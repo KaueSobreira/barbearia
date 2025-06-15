@@ -212,6 +212,7 @@ const ListServico = () => {
                       }
                       required
                       disabled={isSubmitting}
+                      maxLength={30}
                     />
                   </div>
 

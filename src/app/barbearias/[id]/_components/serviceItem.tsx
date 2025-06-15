@@ -70,12 +70,12 @@ const ServiceItem = ({
             />
           </div>
 
-          {/* CONTEÚDO DIREITA */}
+          {/* direita */}
           <div className="flex-1 space-y-4">
             <h3 className="text-sm font-semibold">{servico.nome}</h3>
             <p className="text-sm text-gray-400">{servico.descricao}</p>
 
-            {/* PREÇO E BOTÃO */}
+            {/* preco */}
             <div className="flex items-center justify-between">
               <p className="text-1xl font-bold text-white">
                 {formatPrice(servico.preco)}
@@ -113,7 +113,7 @@ const ServiceItem = ({
                         </div>
                         <div>
                           <h3 className="font-semibold">{servico.nome}</h3>
-                          <p className="text-sm text-gray-400">
+                          <p className="max-w-xs truncate text-sm text-gray-400">
                             {servico.descricao}
                           </p>
                           <p className="text-primary text-sm font-bold">
