@@ -17,6 +17,8 @@ import { servicoService, Servico } from "@/lib/api/list-servico";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ServiceItem } from "./_components/serviceItem";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import SiderMenu from "@/components/Sidermenu";
 // import PhoneItem from "./_components/phone-item";
 
 const HomeBarbearia = () => {
@@ -112,7 +114,7 @@ const HomeBarbearia = () => {
         <Button
           size="icon"
           variant="secondary"
-          className="absolute top-4 left-4 shadow-lg"
+          className="absolute top-4 left-4 z-10 shadow-lg"
           asChild
         >
           <Link href="/">
@@ -121,13 +123,18 @@ const HomeBarbearia = () => {
         </Button>
 
         {/* Botão Menu */}
-        <Button
-          size="icon"
-          variant="outline"
-          className="absolute top-4 right-4 shadow-lg"
-        >
-          <MenuIcon className="h-4 w-4" />
-        </Button>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              size="icon"
+              variant="outline"
+              className="absolute top-4 right-4 z-10 !bg-black shadow-lg backdrop-blur-sm"
+            >
+              <MenuIcon className="h-4 w-4" />
+            </Button>
+          </SheetTrigger>
+          <SiderMenu />
+        </Sheet>
 
         {/* Overlay gradiente */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
