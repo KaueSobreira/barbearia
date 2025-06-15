@@ -34,6 +34,16 @@ export interface ServicoResponse {
   createdAt: string;
 }
 
+interface ServicoApiResponse {
+  id: string;
+  nome: string;
+  descricao: string;
+  preco: string | number;
+  barberShopId: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export const servicoService = {
   async getServicosByBarbearia(barberShopId: string): Promise<Servico[]> {
     try {
@@ -48,13 +58,15 @@ export const servicoService = {
       console.log("📋 Array de serviços extraído:", servicos);
       console.log(`📊 Número de serviços encontrados: ${servicos.length}`);
 
-      const servicosFormatados = servicos.map((servico: any) => ({
-        ...servico,
-        preco:
-          typeof servico.preco === "string"
-            ? parseFloat(servico.preco)
-            : servico.preco,
-      }));
+      const servicosFormatados: Servico[] = servicos.map(
+        (servico: ServicoApiResponse) => ({
+          ...servico,
+          preco:
+            typeof servico.preco === "string"
+              ? parseFloat(servico.preco)
+              : servico.preco,
+        }),
+      );
 
       console.log("✨ Serviços formatados:", servicosFormatados);
 
