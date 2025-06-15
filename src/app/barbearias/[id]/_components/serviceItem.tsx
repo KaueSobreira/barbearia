@@ -1,21 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// components/ServiceItem.tsx
-import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Servico } from "@/lib/api/list-servico";
+import { CalendarIcon } from "lucide-react";
 
-interface ServiceItemProps {
+const ServiceItem = ({
+  servico,
+  barbearia,
+}: {
   servico: Servico;
-  barbearia?: any;
-}
-
-export function ServiceItem({ servico }: ServiceItemProps) {
+  barbearia: any;
+}) => {
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
     }).format(price);
+  };
+
+  const handleAgendarClick = () => {
+    console.log(
+      `Agendando serviço: ${servico.nome} na barbearia: ${barbearia?.nome}`,
+    );
+    alert(`Em breve: Agendamento para ${servico.nome}`);
   };
 
   return (
@@ -34,7 +41,7 @@ export function ServiceItem({ servico }: ServiceItemProps) {
         </div>
 
         <div className="ml-4">
-          <Button size="sm" className="w-full text-white">
+          <Button size="sm" className="w-full" onClick={handleAgendarClick}>
             <CalendarIcon className="mr-2 h-4 w-4" />
             Agendar
           </Button>
@@ -42,4 +49,6 @@ export function ServiceItem({ servico }: ServiceItemProps) {
       </CardContent>
     </Card>
   );
-}
+};
+
+export default ServiceItem;

@@ -11,15 +11,15 @@ import {
   MapPinIcon,
   MenuIcon,
   StarIcon,
+  CalendarIcon,
 } from "lucide-react";
 import { barbeariaService } from "@/lib/api/list-barbearia";
 import { servicoService, Servico } from "@/lib/api/list-servico";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ServiceItem } from "./_components/serviceItem";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import SiderMenu from "@/components/Sidermenu";
-// import PhoneItem from "./_components/phone-item";
+import ServiceItem from "./_components/serviceItem";
 
 const HomeBarbearia = () => {
   const params = useParams();
@@ -59,9 +59,13 @@ const HomeBarbearia = () => {
   const loadServicos = async () => {
     try {
       setServicosLoading(true);
+      console.log(`Carregando serviços para barbearia ID: ${barbearia.id}`);
+
       const servicosData = await servicoService.getServicosByBarbearia(
         barbearia.id,
       );
+
+      console.log(`${servicosData.length} serviços carregados:`, servicosData);
       setServicos(servicosData);
     } catch (err) {
       console.error("Erro ao carregar serviços:", err);
@@ -136,15 +140,12 @@ const HomeBarbearia = () => {
           <SiderMenu />
         </Sheet>
 
-        {/* Overlay gradiente */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
       </div>
 
-      {/* INFORMAÇÕES DA BARBEARIA */}
       <div className="bg-background border-b border-solid p-5">
         <h1 className="mb-3 text-2xl font-bold">{barbearia.nome}</h1>
 
-        {/* Endereço */}
         <div className="mb-3 flex items-start gap-2">
           <MapPinIcon className="text-primary mt-0.5 flex-shrink-0" size={16} />
           <p className="text-muted-foreground text-sm">
@@ -153,7 +154,6 @@ const HomeBarbearia = () => {
           </p>
         </div>
 
-        {/* Avaliação */}
         <div className="mb-3 flex items-center gap-2">
           <StarIcon className="fill-yellow-400 text-yellow-400" size={16} />
           <p className="text-sm font-medium">
@@ -162,13 +162,11 @@ const HomeBarbearia = () => {
           </p>
         </div>
 
-        {/* Badge da área de atendimento */}
         <Badge variant="secondary" className="text-xs">
           {barbearia.area_atendimento}
         </Badge>
       </div>
 
-      {/* DESCRIÇÃO */}
       <div className="bg-background border-b border-solid p-5">
         <h2 className="text-muted-foreground mb-3 text-xs font-bold uppercase">
           Sobre Nós
@@ -179,11 +177,17 @@ const HomeBarbearia = () => {
         </p>
       </div>
 
-      {/* SERVIÇOS */}
       <div className="bg-background p-5">
-        <h2 className="text-muted-foreground mb-4 text-xs font-bold uppercase">
-          Serviços Disponíveis
-        </h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-muted-foreground text-xs font-bold uppercase">
+            Serviços Disponíveis
+          </h2>
+          {servicos.length > 0 && (
+            <Badge variant="outline" className="text-xs">
+              {servicos.length} {servicos.length === 1 ? "serviço" : "serviços"}
+            </Badge>
+          )}
+        </div>
 
         {servicosLoading ? (
           <div className="flex items-center justify-center py-12">
@@ -206,27 +210,26 @@ const HomeBarbearia = () => {
           </div>
         ) : (
           <div className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">
-              Nenhum serviço cadastrado ainda.
-            </p>
-            <p className="text-muted-foreground text-xs">
-              Entre em contato com a barbearia para mais informações.
-            </p>
+            <div className="mx-auto max-w-sm space-y-4">
+              <div className="bg-muted mx-auto flex h-16 w-16 items-center justify-center rounded-full">
+                <CalendarIcon className="text-muted-foreground h-8 w-8" />
+              </div>
+              <div>
+                <h3 className="mb-2 font-semibold">
+                  Nenhum serviço disponível
+                </h3>
+                <p className="text-muted-foreground mb-4 text-sm">
+                  Esta barbearia ainda não cadastrou seus serviços.
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  Entre em contato diretamente para mais informações sobre os
+                  serviços oferecidos.
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
-
-      {/* CONTATO */}
-      {/* <div className="bg-muted/30 border-t border-solid p-5">
-        <h2 className="text-muted-foreground mb-3 text-xs font-bold uppercase">
-          Contato
-        </h2>
-        <div className="space-y-3 p-5">
-          {phones.map((phone) => (
-            <PhoneItem key={phone} phone={phone} />
-          ))}
-        </div>
-      </div> */}
     </div>
   );
 };

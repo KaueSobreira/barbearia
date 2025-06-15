@@ -24,7 +24,7 @@ const bgImages = [
 
 export const barbeariaService = {
   async getAllBarbearias() {
-    const response = await api.get("/barbearias/fetch-barber-shops", {});
+    const response = await api.get("/barbearia/fetch-barber-shops", {});
     const barbearias = response.data.barberShops || [];
 
     return barbearias.map((barbearia: Barbearia, index: number) => ({
