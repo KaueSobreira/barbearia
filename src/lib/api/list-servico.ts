@@ -14,6 +14,21 @@ const api = axios.create({
   },
 });
 
+// Interface para dados de atualização
+interface UpdateServicoData {
+  nome: string;
+  descricao: string;
+  preco: number;
+  idBarberShop: string;
+  idService: string;
+}
+
+// Interface para dados de exclusão
+interface DeleteServicoData {
+  idBarberShop: string;
+  idService: string;
+}
+
 export const servicoService = {
   async getServicosByBarbearia(barberShopId: string): Promise<Servico[]> {
     try {
@@ -72,10 +87,7 @@ export const servicoService = {
     try {
       console.log("➕ Criando serviço:", data);
 
-      const response = await api.post<ServicoResponse>(
-        "/barbearias/servicos",
-        data,
-      );
+      const response = await api.post<ServicoResponse>("/servicos", data);
 
       console.log("✅ Serviço criado com sucesso:", response.data);
       return response.data;
@@ -103,8 +115,78 @@ export const servicoService = {
       throw new Error("Erro ao criar serviço. Tente novamente.");
     }
   },
+
+  async updateServico(data: UpdateServicoData): Promise<ServicoResponse> {
+    try {
+      console.log("✏️ Atualizando serviço:", data);
+
+      const response = await api.put<ServicoResponse>("/servicos", data);
+
+      console.log("✅ Serviço atualizado com sucesso:", response.data);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("❌ Erro ao atualizar serviço:", {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message,
+        });
+
+        if (error.response?.status === 400) {
+          throw new Error("Dados inválidos. Verifique os campos preenchidos.");
+        }
+        if (error.response?.status === 401) {
+          throw new Error("Não autorizado. Faça login novamente.");
+        }
+        if (error.response?.status === 404) {
+          throw new Error("Serviço ou barbearia não encontrada.");
+        }
+        if (error.response?.status === 500) {
+          throw new Error("Erro interno do servidor. Tente novamente.");
+        }
+      }
+      throw new Error("Erro ao atualizar serviço. Tente novamente.");
+    }
+  },
+
+  async deleteServico(data: DeleteServicoData): Promise<void> {
+    try {
+      console.log("🗑️ Excluindo serviço:", data);
+
+      await api.delete("/servicos", {
+        data: data,
+      });
+
+      console.log("✅ Serviço excluído com sucesso");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("❌ Erro ao excluir serviço:", {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message,
+        });
+
+        if (error.response?.status === 400) {
+          throw new Error("Dados inválidos para exclusão.");
+        }
+        if (error.response?.status === 401) {
+          throw new Error("Não autorizado. Faça login novamente.");
+        }
+        if (error.response?.status === 404) {
+          throw new Error("Serviço ou barbearia não encontrada.");
+        }
+        if (error.response?.status === 500) {
+          throw new Error("Erro interno do servidor. Tente novamente.");
+        }
+      }
+      throw new Error("Erro ao excluir serviço. Tente novamente.");
+    }
+  },
 };
 
 export const servicoApiService = {
   createServico: servicoService.createServico,
+  getServicosByBarbearia: servicoService.getServicosByBarbearia,
+  updateServico: servicoService.updateServico,
+  deleteServico: servicoService.deleteServico,
 };
