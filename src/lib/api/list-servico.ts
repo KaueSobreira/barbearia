@@ -1,10 +1,12 @@
 // lib/api/list-servico.ts
 import axios from "axios";
 import {
+  DeleteServicoData,
   Servico,
   ServicoApiResponse,
   ServicoData,
   ServicoResponse,
+  UpdateServicoData,
 } from "../model/servico";
 
 const api = axios.create({
@@ -13,21 +15,6 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
-
-// Interface para dados de atualização
-interface UpdateServicoData {
-  nome: string;
-  descricao: string;
-  preco: number;
-  idBarberShop: string;
-  idService: string;
-}
-
-// Interface para dados de exclusão
-interface DeleteServicoData {
-  idBarberShop: string;
-  idService: string;
-}
 
 export const servicoService = {
   async getServicosByBarbearia(barberShopId: string): Promise<Servico[]> {

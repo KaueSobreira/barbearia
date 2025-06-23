@@ -33,3 +33,16 @@ export interface ServicoApiResponse {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface UpdateServicoData {
+  nome: string;
+  descricao: string;
+  preco: number;
+  idBarberShop: string;
+  idService: string;
+}
+
+export interface DeleteServicoData {
+  idBarberShop: string;
+  idService: string;
+}
