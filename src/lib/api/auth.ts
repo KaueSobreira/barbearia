@@ -17,11 +17,11 @@ export const authService = {
       };
 
       console.log("Sending login request:", {
-        url: `${api.defaults.baseURL}/barbearias/login`,
+        url: `${api.defaults.baseURL}/barbearia/login`,
         data: requestData,
       });
 
-      const response = await api.post("/barbearias/login", requestData);
+      const response = await api.post("/barbearia/login", requestData);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
