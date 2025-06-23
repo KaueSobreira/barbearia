@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sheet";
 import { Servico } from "@/lib/model/servico";
 import { User } from "lucide-react";
+import BookingCalendar from "./booking";
 
 const SERVICE_IMAGES = [
   "https://images.unsplash.com/photo-1622287162716-f311baa1a2b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", // Corte masculino
@@ -58,6 +59,7 @@ const ServiceItem = ({
   const [barberSelectionOpen, setBarberSelectionOpen] = useState(false);
   const [bookingSheetIsOpen, setBookingSheetIsOpen] = useState(false);
   const [selectedBarber, setSelectedBarber] = useState<Barbeiro | null>(null);
+  const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
 
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat("pt-BR", {
@@ -83,9 +85,34 @@ const ServiceItem = ({
   const handleBookingSheetOpenChange = (open: boolean) => {
     setBookingSheetIsOpen(open);
     if (!open) {
-      // Reset barbeiro selecionado quando fechar o sheet
+      // Reset states quando fechar o sheet
       setSelectedBarber(null);
+      setSelectedDateTime(null);
     }
+  };
+
+  const handleDateTimeSelect = (dateTime: Date | null) => {
+    setSelectedDateTime(dateTime);
+  };
+
+  const handleConfirmBooking = () => {
+    if (!selectedBarber || !selectedDateTime) return;
+
+    console.log("Confirmando agendamento:", {
+      servico: servico.nome,
+      barbeiro: selectedBarber.nome,
+      dataHora: selectedDateTime,
+      barbearia: barbearia?.nome,
+    });
+
+    // Aqui você faria a chamada para a API para criar o agendamento
+    // createBooking({ serviceId: servico.id, barberId: selectedBarber.id, dateTime: selectedDateTime })
+
+    alert(
+      `Agendamento confirmado!\n\nServiço: ${servico.nome}\nBarbeiro: ${selectedBarber.nome}\nData: ${selectedDateTime.toLocaleDateString("pt-BR")}\nHorário: ${selectedDateTime.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`,
+    );
+
+    handleBookingSheetOpenChange(false);
   };
 
   const getServiceImage = (servicoId: string): string => {
@@ -173,7 +200,7 @@ const ServiceItem = ({
                     {/* Botão Escolher */}
                     <Button
                       onClick={() => handleBarberSelect(barbeiro)}
-                      className="bg-white hover:bg-blue-700"
+                      className="bg-blue-600 hover:bg-blue-700"
                     >
                       Escolher
                     </Button>
@@ -190,79 +217,63 @@ const ServiceItem = ({
         open={bookingSheetIsOpen}
         onOpenChange={handleBookingSheetOpenChange}
       >
-        <SheetContent className="px-0">
-          <SheetHeader>
+        <SheetContent className="w-full max-w-md overflow-y-auto px-0">
+          <SheetHeader className="px-5">
             <SheetTitle>Fazer Reserva</SheetTitle>
           </SheetHeader>
 
-          {/* Conteúdo do agendamento */}
-          <div className="p-5">
-            <div className="space-y-4">
-              {/* Informações do Serviço */}
-              <div className="flex items-center gap-3 border-b pb-4">
-                <div className="relative h-16 w-16">
+          {/* Resumo do Serviço e Barbeiro */}
+          <div className="space-y-4 border-b px-5 py-4">
+            {/* Informações do Serviço */}
+            <div className="flex items-center gap-3">
+              <div className="relative h-16 w-16">
+                <Image
+                  alt={servico.nome}
+                  src={getServiceImage(servico.id)}
+                  fill
+                  className="rounded-lg object-cover"
+                />
+              </div>
+              <div>
+                <h3 className="font-semibold">{servico.nome}</h3>
+                <p className="max-w-xs truncate text-sm text-gray-400">
+                  {servico.descricao}
+                </p>
+                <p className="text-primary text-sm font-bold">
+                  {formatPrice(servico.preco)}
+                </p>
+              </div>
+            </div>
+
+            {/* Barbeiro Selecionado */}
+            {selectedBarber && (
+              <div className="flex items-center gap-3">
+                <div className="relative h-12 w-12">
                   <Image
-                    alt={servico.nome}
-                    src={getServiceImage(servico.id)}
+                    alt={selectedBarber.nome}
+                    src={selectedBarber.foto}
                     fill
-                    className="rounded-lg object-cover"
+                    className="rounded-full object-cover"
                   />
                 </div>
                 <div>
-                  <h3 className="font-semibold">{servico.nome}</h3>
-                  <p className="max-w-xs truncate text-sm text-gray-400">
-                    {servico.descricao}
-                  </p>
-                  <p className="text-primary text-sm font-bold">
-                    {formatPrice(servico.preco)}
-                  </p>
+                  <p className="font-medium">{selectedBarber.nome}</p>
+                  <p className="text-muted-foreground text-sm">Barbeiro</p>
                 </div>
               </div>
-
-              {/* Barbeiro Selecionado */}
-              {selectedBarber && (
-                <div className="space-y-3 border-b pb-4">
-                  <h4 className="font-semibold">Barbeiro Selecionado</h4>
-                  <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-12">
-                      <Image
-                        alt={selectedBarber.nome}
-                        src={selectedBarber.foto}
-                        fill
-                        className="rounded-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-medium">{selectedBarber.nome}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Informações da Barbearia */}
-              <div className="space-y-3">
-                <h4 className="font-semibold">Barbearia</h4>
-                <div className="flex items-center gap-3">
-                  <div className="relative h-12 w-12">
-                    <Image
-                      alt={barbearia?.nome || "Barbearia"}
-                      src={barbearia?.image || SERVICE_IMAGES[0]}
-                      fill
-                      className="rounded-lg object-cover"
-                    />
-                  </div>
-                  <div>
-                    <p className="font-medium">{barbearia?.nome}</p>
-                    <p className="text-xs text-gray-400">
-                      {barbearia?.cidade}, {barbearia?.estado}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
 
-          <SheetFooter className="mt-5 px-5">
+          {/* Calendário de Agendamento */}
+          {selectedBarber && (
+            <BookingCalendar
+              serviceId={servico.id}
+              barberId={selectedBarber.id}
+              onDateTimeSelect={handleDateTimeSelect}
+            />
+          )}
+
+          <SheetFooter className="mt-5 px-5 pb-5">
             <div className="flex w-full gap-3">
               <Button
                 onClick={() => {
@@ -274,7 +285,11 @@ const ServiceItem = ({
               >
                 Trocar Barbeiro
               </Button>
-              <Button className="flex-1 bg-blue-600 text-white hover:bg-blue-700">
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                onClick={handleConfirmBooking}
+                disabled={!selectedDateTime}
+              >
                 Confirmar Reserva
               </Button>
             </div>
