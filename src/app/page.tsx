@@ -196,29 +196,31 @@ const Home = () => {
                     </div>
                   </div>
 
-                  <div className="relative p-4 pt-0">
-                    <Button
-                      asChild
-                      className="w-full bg-blue-600 py-2 text-xs text-white hover:bg-blue-700"
-                    >
-                      <Link href={`/barbearias/${shop.id}`}>Agendar</Link>
-                    </Button>
+                  <div className="p-4 pt-0">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        asChild
+                        className="flex-1 bg-blue-600 py-2 text-xs text-white hover:bg-blue-700"
+                      >
+                        <Link href={`/barbearias/${shop.id}`}>Agendar</Link>
+                      </Button>
 
-                    {/* Coração Favorito - Mobile */}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="absolute right-2 bottom-2 h-8 w-8 p-0 hover:bg-transparent"
-                      onClick={() => toggleFavorite(shop.id)}
-                    >
-                      <Heart
-                        className={`h-5 w-5 ${
-                          favorites.has(shop.id)
-                            ? "fill-red-500 text-red-500"
-                            : "text-gray-400 hover:text-red-500"
-                        }`}
-                      />
-                    </Button>
+                      {/* Coração Favorito - Mobile */}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 hover:bg-gray-800"
+                        onClick={() => toggleFavorite(shop.id)}
+                      >
+                        <Heart
+                          className={`h-5 w-5 ${
+                            favorites.has(shop.id)
+                              ? "fill-red-500 text-red-500"
+                              : "text-gray-400 hover:text-red-500"
+                          }`}
+                        />
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
@@ -259,31 +261,33 @@ const Home = () => {
                     </p>
                   </CardContent>
 
-                  <CardFooter className="relative p-6 pt-0">
-                    <Button
-                      asChild
-                      className="w-full bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                      <Link href={`/barbearias/${shop.id}`}>
-                        Agendar Horário
-                      </Link>
-                    </Button>
+                  <CardFooter className="p-6 pt-0">
+                    <div className="flex w-full items-center gap-3">
+                      <Button
+                        asChild
+                        className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                      >
+                        <Link href={`/barbearias/${shop.id}`}>
+                          Agendar Horário
+                        </Link>
+                      </Button>
 
-                    {/* Coração Favorito - Desktop */}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="absolute right-4 bottom-4 h-10 w-10 p-0 hover:bg-gray-100"
-                      onClick={() => toggleFavorite(shop.id)}
-                    >
-                      <Heart
-                        className={`h-6 w-6 ${
-                          favorites.has(shop.id)
-                            ? "fill-red-500 text-red-500"
-                            : "text-gray-400 hover:text-red-500"
-                        }`}
-                      />
-                    </Button>
+                      {/* Coração Favorito - Desktop */}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-10 w-10 p-0 hover:bg-gray-100"
+                        onClick={() => toggleFavorite(shop.id)}
+                      >
+                        <Heart
+                          className={`h-6 w-6 ${
+                            favorites.has(shop.id)
+                              ? "fill-red-500 text-red-500"
+                              : "text-gray-400 hover:text-red-500"
+                          }`}
+                        />
+                      </Button>
+                    </div>
                   </CardFooter>
                 </div>
               </Card>
@@ -366,29 +370,31 @@ const Home = () => {
                     </div>
                   </div>
 
-                  <div className="relative p-4 pt-0">
-                    <Button
-                      asChild
-                      className="w-full bg-blue-600 py-2 text-xs text-white hover:bg-blue-700"
-                    >
-                      <Link href={`/barbearias/${shop.id}`}>Agendar</Link>
-                    </Button>
+                  <div className="p-4 pt-0">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        asChild
+                        className="flex-1 bg-blue-600 py-2 text-xs text-white hover:bg-blue-700"
+                      >
+                        <Link href={`/barbearias/${shop.id}`}>Agendar</Link>
+                      </Button>
 
-                    {/* Coração Favorito - Mobile */}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="absolute right-2 bottom-2 h-8 w-8 p-0 hover:bg-transparent"
-                      onClick={() => toggleFavorite(shop.id)}
-                    >
-                      <Heart
-                        className={`h-5 w-5 ${
-                          favorites.has(shop.id)
-                            ? "fill-red-500 text-red-500"
-                            : "text-gray-400 hover:text-red-500"
-                        }`}
-                      />
-                    </Button>
+                      {/* Coração Favorito - Mobile */}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 hover:bg-gray-800"
+                        onClick={() => toggleFavorite(shop.id)}
+                      >
+                        <Heart
+                          className={`h-5 w-5 ${
+                            favorites.has(shop.id)
+                              ? "fill-red-500 text-red-500"
+                              : "text-gray-400 hover:text-red-500"
+                          }`}
+                        />
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
