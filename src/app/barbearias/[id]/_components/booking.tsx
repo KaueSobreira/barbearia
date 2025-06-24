@@ -8,7 +8,6 @@ import { ptBR } from "date-fns/locale";
 import { isPast, isToday, set } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 
-// Lista de horários disponíveis
 const TIME_LIST = [
   "08:00",
   "08:30",
@@ -40,13 +39,11 @@ interface BookingCalendarProps {
   selectedDate?: Date;
 }
 
-// Função para filtrar horários (apenas remove horários que já passaram hoje)
 const getAvailableTimeList = (selectedDay: Date) => {
   return TIME_LIST.filter((time) => {
     const hour = Number(time.split(":")[0]);
     const minutes = Number(time.split(":")[1]);
 
-    // Verifica se o horário já passou (apenas para hoje)
     const timeIsOnThePast = isPast(set(new Date(), { hours: hour, minutes }));
     if (timeIsOnThePast && isToday(selectedDay)) {
       return false;
@@ -67,7 +64,6 @@ const BookingCalendar = ({
   );
   const [selectedTime, setSelectedTime] = useState<string | undefined>();
 
-  // Calcular data/hora selecionada final
   const selectedDateTime = useMemo(() => {
     if (!selectedDay || !selectedTime) return null;
 
@@ -75,12 +71,10 @@ const BookingCalendar = ({
     return set(selectedDay, { hours, minutes });
   }, [selectedDay, selectedTime]);
 
-  // Notificar mudanças para o componente pai
   useEffect(() => {
     onDateTimeSelect(selectedDateTime);
   }, [selectedDateTime, onDateTimeSelect]);
 
-  // Calcular horários disponíveis (todos disponíveis, exceto os que já passaram hoje)
   const availableTimeList = useMemo(() => {
     if (!selectedDay) return [];
     return getAvailableTimeList(selectedDay);
@@ -88,7 +82,7 @@ const BookingCalendar = ({
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDay(date);
-    setSelectedTime(undefined); // Reset time when date changes
+    setSelectedTime(undefined);
   };
 
   const handleTimeSelect = (time: string) => {
@@ -133,7 +127,6 @@ const BookingCalendar = ({
         </div>
       </div>
 
-      {/* Seleção de Horários */}
       {selectedDay && (
         <div className="border-b border-solid pb-5">
           <h4 className="mb-3 px-5 font-semibold">Horários Disponíveis</h4>
@@ -159,7 +152,6 @@ const BookingCalendar = ({
         </div>
       )}
 
-      {/* Resumo da seleção */}
       {selectedDateTime && (
         <div className="px-5">
           <div className="bg-muted rounded-lg p-4">

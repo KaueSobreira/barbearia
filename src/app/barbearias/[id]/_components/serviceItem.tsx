@@ -200,7 +200,7 @@ const ServiceItem = ({
                     {/* Botão Escolher */}
                     <Button
                       onClick={() => handleBarberSelect(barbeiro)}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-blue-600 text-white hover:bg-blue-700"
                     >
                       Escolher
                     </Button>
@@ -286,7 +286,7 @@ const ServiceItem = ({
                 Trocar Barbeiro
               </Button>
               <Button
-                className="flex-1 bg-green-600 hover:bg-green-700"
+                className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
                 onClick={handleConfirmBooking}
                 disabled={!selectedDateTime}
               >
