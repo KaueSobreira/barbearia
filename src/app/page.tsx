@@ -93,6 +93,14 @@ const Home = () => {
     return barbearias.filter((shop) => favorites.has(shop.id));
   };
 
+  const clearSearch = () => {
+    setSearchQuery("");
+    setFilteredBarbearias(barbearias);
+  };
+
+  const hasActiveSearch = searchQuery.trim() !== "";
+  const favoriteShops = getFavoriteShops();
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -104,13 +112,11 @@ const Home = () => {
     );
   }
 
-  const favoriteShops = getFavoriteShops();
-
   return (
     <div className="min-h-screen">
       <Header />
 
-      {/* Search Bar */}
+      {/*Barra de opesquisa */}
       <div className="flex flex-col items-center justify-center p-4 pt-8">
         <Input
           className="mb-6 max-w-sm rounded-full border-gray-300 text-center focus:border-blue-500"
@@ -120,7 +126,7 @@ const Home = () => {
         />
       </div>
 
-      {/* Error Alert */}
+      {/* aletta do errot */}
       {error && (
         <div className="mx-auto mb-4 max-w-md px-4">
           <Alert variant="destructive">
@@ -130,14 +136,14 @@ const Home = () => {
         </div>
       )}
 
-      {/* User Info */}
-      <div className="pb-5 pl-10 font-bold text-gray-300">
-        <h1>Kaue Sobreira Lucena</h1>
-        <p className="text-sm font-semibold">Domingo, 08 Junho de 2025</p>
-      </div>
+      {!hasActiveSearch && (
+        <div className="pb-5 pl-10 font-bold text-gray-300">
+          <h1>Kaue Sobreira Lucena</h1>
+          <p className="text-sm font-semibold">Domingo, 08 Junho de 2025</p>
+        </div>
+      )}
 
-      {/* Favorites Section */}
-      {favoriteShops.length > 0 && (
+      {!hasActiveSearch && favoriteShops.length > 0 && (
         <div className="mx-auto mb-8 w-full max-w-7xl px-4">
           <h2 className="mb-4 text-center text-2xl font-bold text-gray-600">
             Meus Favoritos
@@ -164,35 +170,64 @@ const Home = () => {
         </div>
       )}
 
-      {/* All Barbershops Section */}
+      {/* rtesutlaod */}
       <div className="mx-auto w-full max-w-7xl px-4">
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <h2 className="text-center text-2xl font-bold text-gray-600">
-            Barbearias
-          </h2>
-        </div>
+        {!hasActiveSearch && (
+          <div className="mb-6 flex items-center justify-center gap-2">
+            <h2 className="text-center text-2xl font-bold text-gray-600">
+              Barbearias
+            </h2>
+          </div>
+        )}
 
-        {filteredBarbearias.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="text-gray-500">
-              {searchQuery
-                ? `Nenhuma barbearia encontrada para "${searchQuery}"`
-                : "Nenhuma barbearia cadastrada ainda."}
-            </p>
-            {searchQuery && (
+        {hasActiveSearch && filteredBarbearias.length === 0 ? (
+          <div className="py-16 text-center">
+            <div className="mx-auto max-w-md space-y-4">
+              <p className="text-lg text-gray-600">
+                Não há resultados para <strong>{searchQuery}</strong>
+              </p>
+              <p className="text-sm text-gray-500">
+                Tente pesquisar por outro termo ou verifique a ortografia.
+              </p>
               <Button
-                variant="outline"
-                onClick={() => {
-                  setSearchQuery("");
-                  setFilteredBarbearias(barbearias);
-                }}
-                className="mt-4"
+                onClick={clearSearch}
+                className="mt-4 bg-blue-600 font-bold text-white hover:bg-blue-700"
               >
-                Limpar busca
+                Limpar pesquisa
               </Button>
-            )}
+            </div>
+          </div>
+        ) : hasActiveSearch ? (
+          <div>
+            <div className="mb-4 text-center">
+              <p className="text-gray-600">
+                {filteredBarbearias.length} resultado
+                {filteredBarbearias.length !== 1 ? "s" : ""} para{" "}
+                <strong>{searchQuery}</strong>
+              </p>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden">
+              {filteredBarbearias.map((shop) => (
+                <Card
+                  key={shop.id}
+                  className="flex-shrink-0 overflow-hidden border-0 !bg-transparent shadow-lg"
+                >
+                  <BarbershopCardMobile
+                    shop={shop}
+                    isFavorite={favorites.has(shop.id)}
+                    onToggleFavorite={() => toggleFavorite(shop.id)}
+                  />
+                  <BarbershopCardDesktop
+                    shop={shop}
+                    isFavorite={favorites.has(shop.id)}
+                    onToggleFavorite={() => toggleFavorite(shop.id)}
+                  />
+                </Card>
+              ))}
+            </div>
           </div>
         ) : (
+          //
           <div className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden">
             {filteredBarbearias.map((shop) => (
               <Card
