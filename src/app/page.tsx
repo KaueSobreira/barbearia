@@ -93,6 +93,10 @@ const Home = () => {
     return barbearias.filter((shop) => favorites.has(shop.id));
   };
 
+  const getTopRatedShops = () => {
+    return [...barbearias].sort((a, b) => b.rating - a.rating).slice(0, 10);
+  };
+
   const clearSearch = () => {
     setSearchQuery("");
     setFilteredBarbearias(barbearias);
@@ -100,6 +104,7 @@ const Home = () => {
 
   const hasActiveSearch = searchQuery.trim() !== "";
   const favoriteShops = getFavoriteShops();
+  const topRatedShops = getTopRatedShops();
 
   if (loading) {
     return (
@@ -116,7 +121,6 @@ const Home = () => {
     <div className="min-h-screen">
       <Header />
 
-      {/*Barra de opesquisa */}
       <div className="flex flex-col items-center justify-center p-4 pt-8">
         <Input
           className="mb-6 max-w-sm rounded-full border-gray-300 text-center focus:border-blue-500"
@@ -126,7 +130,6 @@ const Home = () => {
         />
       </div>
 
-      {/* aletta do errot */}
       {error && (
         <div className="mx-auto mb-4 max-w-md px-4">
           <Alert variant="destructive">
@@ -170,12 +173,38 @@ const Home = () => {
         </div>
       )}
 
-      {/* rtesutlaod */}
+      {!hasActiveSearch && (
+        <div className="mx-auto mb-8 w-full max-w-7xl px-4">
+          <h2 className="mb-4 text-center text-2xl font-bold text-gray-600">
+            Barbearias
+          </h2>
+          <div className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden">
+            {topRatedShops.map((shop) => (
+              <Card
+                key={`top-rated-${shop.id}`}
+                className="flex-shrink-0 overflow-hidden border-0 !bg-transparent shadow-lg"
+              >
+                <BarbershopCardMobile
+                  shop={shop}
+                  isFavorite={favorites.has(shop.id)}
+                  onToggleFavorite={() => toggleFavorite(shop.id)}
+                />
+                <BarbershopCardDesktop
+                  shop={shop}
+                  isFavorite={favorites.has(shop.id)}
+                  onToggleFavorite={() => toggleFavorite(shop.id)}
+                />
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mx-auto w-full max-w-7xl px-4">
         {!hasActiveSearch && (
           <div className="mb-6 flex items-center justify-center gap-2">
             <h2 className="text-center text-2xl font-bold text-gray-600">
-              Barbearias
+              Melhores Avaliados
             </h2>
           </div>
         )}
@@ -227,7 +256,6 @@ const Home = () => {
             </div>
           </div>
         ) : (
-          //
           <div className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden">
             {filteredBarbearias.map((shop) => (
               <Card
