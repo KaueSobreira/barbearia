@@ -21,34 +21,34 @@ const BarbershopCardDesktop = ({
       <CardHeader className="relative h-48 p-0">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${shop.bgImage})` }}
+          style={{ backgroundImage: `url(${shop.image})` }} // Usa imagem do shop
         >
-          <div className="bg-opacity-40 absolute inset-0 bg-black"></div>
+          <div className="bg-opacity-40 absolute inset-0"></div>
         </div>
 
-        <div className="relative z-10 flex h-full flex-col justify-end p-6 text-white">
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-xl font-bold">{shop.nome}</h3>
-            <Badge className="bg-blue-600 px-3 py-1 text-white">
-              {shop.cidade}
-            </Badge>
-          </div>
-        </div>
+        <div className="relative z-10 flex h-full flex-col justify-end p-6 text-white"></div>
       </CardHeader>
 
       <CardContent className="p-6">
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-xl font-bold text-black">{shop.nome}</h3>
+          <Badge className="bg-blue-600 px-3 py-1 text-white">
+            {shop.cidade}
+          </Badge>
+        </div>
         <p className="mb-3 text-gray-600">
           {shop.logradouro}, {shop.numero} - {shop.bairro}
         </p>
 
+        <p className="line-clamp-3 pb-3 text-sm text-gray-600">
+          {shop.description}
+        </p>
         <div className="mb-4 flex items-center">
           <div className="flex text-yellow-400">⭐⭐⭐⭐⭐</div>
           <span className="ml-2 text-gray-600">
             ({shop.rating.toFixed(1)}) • {shop.reviews} avaliações
           </span>
         </div>
-
-        <p className="line-clamp-3 text-sm text-gray-600">{shop.description}</p>
       </CardContent>
 
       <CardFooter className="p-6 pt-0">
