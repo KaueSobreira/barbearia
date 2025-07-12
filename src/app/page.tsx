@@ -1,18 +1,18 @@
-// app/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { barbeariaService } from "@/lib/api/list-barbearia";
 import Header from "@/components/header";
 import BarbershopCardMobile from "./_components/mobile";
 import BarbershopCardDesktop from "./_components/desktop";
-import { useSearchParams } from "next/navigation"; // Importar useSearchParams
+import { useSearchParams } from "next/navigation";
 
 const Home = () => {
   const [barbearias, setBarbearias] = useState<any[]>([]);
@@ -20,9 +20,13 @@ const Home = () => {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  const searchParams = useSearchParams(); // Inicializar useSearchParams
-  const initialSearchQuery = searchParams.get("search") || ""; // Ler o parâmetro 'search'
-  const [searchQuery, setSearchQuery] = useState(initialSearchQuery); // Inicializar com o valor da URL
+  const searchParams = useSearchParams();
+  const initialSearchQuery = searchParams.get("search") || "";
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+
+  const favoriteScrollRef = useRef<HTMLDivElement | null>(null);
+  const topRatedScrollRef = useRef<HTMLDivElement | null>(null);
+  const filteredScrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     loadBarbearias();
@@ -30,7 +34,6 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    // Quando o searchQuery muda (manual ou via URL), aplica o filtro
     if (searchQuery.trim() === "") {
       setFilteredBarbearias(barbearias);
     } else {
@@ -39,7 +42,6 @@ const Home = () => {
           barbearia.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
           barbearia.cidade.toLowerCase().includes(searchQuery.toLowerCase()) ||
           barbearia.bairro.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          // Adicione a condição para area_atendimento aqui
           (barbearia.area_atendimento &&
             barbearia.area_atendimento
               .toLowerCase()
@@ -49,21 +51,19 @@ const Home = () => {
     }
   }, [searchQuery, barbearias]);
 
-  // Adicione este useEffect para reagir a mudanças no searchParams (se o usuário navegar diretamente com a URL)
   useEffect(() => {
     const paramSearch = searchParams.get("search") || "";
     if (paramSearch !== searchQuery) {
       setSearchQuery(paramSearch);
     }
-  }, [searchParams]); // Dependência em searchParams para reagir a mudanças de URL
+  }, [searchParams]);
 
   const loadBarbearias = async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await barbeariaService.getAllBarbearias(); //
+      const data = await barbeariaService.getAllBarbearias();
       setBarbearias(data);
-      // Aplica o filtro inicial se houver um search param na URL
       if (initialSearchQuery) {
         const filtered = data.filter(
           (barbearia: any) =>
@@ -145,6 +145,15 @@ const Home = () => {
   const favoriteShops = getFavoriteShops();
   const topRatedShops = getTopRatedShops();
 
+  const scrollAmount = 450;
+  const scrollLeft = (ref: React.RefObject<HTMLDivElement | null>) => {
+    ref.current?.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+  };
+
+  const scrollRight = (ref: React.RefObject<HTMLDivElement | null>) => {
+    ref.current?.scrollBy({ left: scrollAmount, behavior: "smooth" });
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -155,6 +164,71 @@ const Home = () => {
       </div>
     );
   }
+
+  const BarbershopCarousel = ({
+    shops,
+    title,
+    scrollRef,
+  }: {
+    shops: any[];
+    title: string;
+    scrollRef: React.RefObject<HTMLDivElement | null>;
+  }) => {
+    if (shops.length === 0) return null;
+
+    return (
+      <div className="relative mx-auto mb-8 w-full max-w-7xl px-4">
+        <h2 className="mb-4 text-center text-2xl font-bold text-white">
+          {title}
+        </h2>
+        {/* Container principal para o carrossel, que agora terá padding nas laterais no desktop */}
+        <div className="relative md:px-12">
+          <Button
+            onClick={() => scrollLeft(scrollRef)}
+            className="group bg-opacity-70 absolute top-1/2 left-[-20px] z-20 hidden -translate-y-1/2 rounded-full bg-transparent p-3 pr-4 text-white shadow-lg ring-0 transition-all duration-300 hover:bg-transparent focus:bg-transparent focus:ring-0 focus:outline-none active:bg-transparent md:block"
+            asChild
+          >
+            <ChevronLeft className="h-20 w-20 transform transition-transform duration-300 group-hover:scale-110" />
+          </Button>
+
+          <div
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden"
+          >
+            {shops.map((shop) => (
+              <Card
+                key={shop.id}
+                className="flex-shrink-0 overflow-hidden border-0 !bg-transparent shadow-lg"
+              >
+                <div className="md:hidden">
+                  <BarbershopCardMobile
+                    shop={shop}
+                    isFavorite={favorites.has(shop.id)}
+                    onToggleFavorite={() => toggleFavorite(shop.id)}
+                  />
+                </div>
+                <div className="hidden md:block">
+                  <BarbershopCardDesktop
+                    shop={shop}
+                    isFavorite={favorites.has(shop.id)}
+                    onToggleFavorite={() => toggleFavorite(shop.id)}
+                  />
+                </div>
+              </Card>
+            ))}
+          </div>
+          {/* Seta direita - visível apenas no desktop, sempre visível */}
+          <Button
+            onClick={() => scrollRight(scrollRef)}
+            className="group bg-opacity-70 absolute top-1/2 right-[-20px] z-20 hidden -translate-y-1/2 rounded-full bg-transparent p-3 pl-4 text-white shadow-lg ring-0 transition-all duration-300 hover:bg-transparent focus:bg-transparent focus:ring-0 focus:outline-none active:bg-transparent md:block"
+            asChild
+          >
+            <ChevronRight className="h-20 w-20 transform transition-transform duration-300 group-hover:scale-110" />
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen">
@@ -181,73 +255,27 @@ const Home = () => {
       {!hasActiveSearch && (
         <div className="pb-5 pl-10 font-bold text-gray-300">
           <h1>Kaue Sobreira Lucena</h1>
-          <p className="text-sm font-semibold">Domingo, 08 Junho de 2025</p>
+          <p className="text-sm font-semibold">Domingo, 08 Julho de 2025</p>
         </div>
       )}
 
       {!hasActiveSearch && favoriteShops.length > 0 && (
-        <div className="mx-auto mb-8 w-full max-w-7xl px-4">
-          <h2 className="mb-4 text-center text-2xl font-bold text-white">
-            Meus Favoritos
-          </h2>
-          <div className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden">
-            {favoriteShops.map((shop) => (
-              <Card
-                key={`favorite-${shop.id}`}
-                className="flex-shrink-0 overflow-hidden border-0 !bg-transparent shadow-lg"
-              >
-                <BarbershopCardMobile
-                  shop={shop}
-                  isFavorite={favorites.has(shop.id)}
-                  onToggleFavorite={() => toggleFavorite(shop.id)}
-                />
-                <BarbershopCardDesktop
-                  shop={shop}
-                  isFavorite={favorites.has(shop.id)}
-                  onToggleFavorite={() => toggleFavorite(shop.id)}
-                />
-              </Card>
-            ))}
-          </div>
-        </div>
+        <BarbershopCarousel
+          shops={favoriteShops}
+          title="Meus Favoritos"
+          scrollRef={favoriteScrollRef}
+        />
       )}
 
       {!hasActiveSearch && (
-        <div className="mx-auto mb-8 w-full max-w-7xl px-4">
-          <h2 className="mb-4 text-center text-2xl font-bold text-white">
-            Barbearias
-          </h2>
-          <div className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden">
-            {topRatedShops.map((shop) => (
-              <Card
-                key={`top-rated-${shop.id}`}
-                className="flex-shrink-0 overflow-hidden border-0 !bg-transparent shadow-lg"
-              >
-                <BarbershopCardMobile
-                  shop={shop}
-                  isFavorite={favorites.has(shop.id)}
-                  onToggleFavorite={() => toggleFavorite(shop.id)}
-                />
-                <BarbershopCardDesktop
-                  shop={shop}
-                  isFavorite={favorites.has(shop.id)}
-                  onToggleFavorite={() => toggleFavorite(shop.id)}
-                />
-              </Card>
-            ))}
-          </div>
-        </div>
+        <BarbershopCarousel
+          shops={topRatedShops}
+          title="Barbearias"
+          scrollRef={topRatedScrollRef}
+        />
       )}
 
       <div className="mx-auto w-full max-w-7xl px-4">
-        {!hasActiveSearch && (
-          <div className="mb-6 flex items-center justify-center gap-2">
-            <h2 className="text-center text-2xl font-bold text-white">
-              Melhores Avaliados
-            </h2>
-          </div>
-        )}
-
         {hasActiveSearch && filteredBarbearias.length === 0 ? (
           <div className="py-16 text-center">
             <div className="mx-auto max-w-md space-y-4">
@@ -265,55 +293,16 @@ const Home = () => {
               </Button>
             </div>
           </div>
-        ) : hasActiveSearch ? (
-          <div>
-            <div className="mb-4 text-center">
-              <p className="text-gray-600">
-                {filteredBarbearias.length} resultado
-                {filteredBarbearias.length !== 1 ? "s" : ""} para{" "}
-                <strong>{searchQuery}</strong>
-              </p>
-            </div>
-            <div className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden">
-              {filteredBarbearias.map((shop) => (
-                <Card
-                  key={shop.id}
-                  className="flex-shrink-0 overflow-hidden border-0 !bg-transparent shadow-lg"
-                >
-                  <BarbershopCardMobile
-                    shop={shop}
-                    isFavorite={favorites.has(shop.id)}
-                    onToggleFavorite={() => toggleFavorite(shop.id)}
-                  />
-                  <BarbershopCardDesktop
-                    shop={shop}
-                    isFavorite={favorites.has(shop.id)}
-                    onToggleFavorite={() => toggleFavorite(shop.id)}
-                  />
-                </Card>
-              ))}
-            </div>
-          </div>
         ) : (
-          <div className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden">
-            {filteredBarbearias.map((shop) => (
-              <Card
-                key={shop.id}
-                className="flex-shrink-0 overflow-hidden border-0 !bg-transparent shadow-lg"
-              >
-                <BarbershopCardMobile
-                  shop={shop}
-                  isFavorite={favorites.has(shop.id)}
-                  onToggleFavorite={() => toggleFavorite(shop.id)}
-                />
-                <BarbershopCardDesktop
-                  shop={shop}
-                  isFavorite={favorites.has(shop.id)}
-                  onToggleFavorite={() => toggleFavorite(shop.id)}
-                />
-              </Card>
-            ))}
-          </div>
+          <BarbershopCarousel
+            shops={hasActiveSearch ? filteredBarbearias : barbearias}
+            title={
+              hasActiveSearch
+                ? `Resultados para "${searchQuery}"`
+                : "Melhores Avaliados"
+            }
+            scrollRef={filteredScrollRef}
+          />
         )}
       </div>
     </div>
