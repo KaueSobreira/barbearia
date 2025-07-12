@@ -17,7 +17,7 @@ const BarbershopCardDesktop = ({
   onToggleFavorite,
 }: BarbershopCardDesktopProps) => {
   return (
-    <div className="hidden w-[400px] overflow-hidden rounded-2xl bg-white md:block">
+    <div className="hidden w-[400px] overflow-hidden rounded-2xl bg-gray-900 md:block">
       <CardHeader className="relative h-48 p-0">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -31,21 +31,21 @@ const BarbershopCardDesktop = ({
 
       <CardContent className="p-6">
         <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-xl font-bold text-black">{shop.nome}</h3>
+          <h3 className="text-xl font-bold text-white">{shop.nome}</h3>
           <Badge className="bg-blue-600 px-3 py-1 text-white">
             {shop.cidade}
           </Badge>
         </div>
-        <p className="mb-3 text-gray-600">
+        <p className="mb-3 text-white">
           {shop.logradouro}, {shop.numero} - {shop.bairro}
         </p>
 
-        <p className="line-clamp-3 pb-3 text-sm text-gray-600">
+        <p className="line-clamp-3 pb-3 text-sm text-white">
           {shop.description}
         </p>
         <div className="mb-4 flex items-center">
           <div className="flex text-yellow-400">⭐⭐⭐⭐⭐</div>
-          <span className="ml-2 text-gray-600">
+          <span className="ml-2 text-white">
             ({shop.rating.toFixed(1)}) • {shop.reviews} avaliações
           </span>
         </div>
