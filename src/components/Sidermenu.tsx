@@ -1,3 +1,4 @@
+// components/SiderMenu.tsx
 "use client";
 
 import { Button } from "./ui/button";
@@ -14,8 +15,15 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { categoryOptions } from "@/lib/model/category";
+import { useRouter } from "next/navigation"; // Importar useRouter
 
 const SiderMenu = () => {
+  const router = useRouter(); // Inicializar useRouter
+
+  const handleCategoryClick = (categoryTitle: string) => {
+    router.push(`/?search=${encodeURIComponent(categoryTitle)}`); // Redirecionar com o parâmetro de busca
+  };
+
   return (
     <SheetContent className="overflow-y-auto pr-5 pl-5">
       <SheetHeader className="pl-0">
@@ -73,16 +81,19 @@ const SiderMenu = () => {
       <div className="flex flex-col gap-2 border-b border-solid py-5">
         {categoryOptions.map((option) => (
           <SheetClose key={option.title} asChild>
-            <Button className="justify-start gap-2" variant={"ghost"} asChild>
-              <Link href={`/barbershops?category=${option.title}`}>
-                <Image
-                  src={option.imageUrl}
-                  width={16}
-                  height={16}
-                  alt={option.title}
-                />
-                {option.title}
-              </Link>
+            {/* Alterado para usar onClick e handleCategoryClick */}
+            <Button
+              className="justify-start gap-2"
+              variant={"ghost"}
+              onClick={() => handleCategoryClick(option.title)}
+            >
+              <Image
+                src={option.imageUrl}
+                width={16}
+                height={16}
+                alt={option.title}
+              />
+              {option.title}
             </Button>
           </SheetClose>
         ))}

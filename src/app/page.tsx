@@ -1,3 +1,4 @@
+// app/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -11,6 +12,7 @@ import { barbeariaService } from "@/lib/api/list-barbearia";
 import Header from "@/components/header";
 import BarbershopCardMobile from "./_components/mobile";
 import BarbershopCardDesktop from "./_components/desktop";
+import { useSearchParams } from "next/navigation"; // Importar useSearchParams
 
 const Home = () => {
   const [barbearias, setBarbearias] = useState<any[]>([]);
@@ -18,7 +20,9 @@ const Home = () => {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchParams = useSearchParams(); // Inicializar useSearchParams
+  const initialSearchQuery = searchParams.get("search") || ""; // Ler o parâmetro 'search'
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery); // Inicializar com o valor da URL
 
   useEffect(() => {
     loadBarbearias();
@@ -26,6 +30,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    // Quando o searchQuery muda (manual ou via URL), aplica o filtro
     if (searchQuery.trim() === "") {
       setFilteredBarbearias(barbearias);
     } else {
@@ -33,19 +38,53 @@ const Home = () => {
         (barbearia) =>
           barbearia.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
           barbearia.cidade.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          barbearia.bairro.toLowerCase().includes(searchQuery.toLowerCase()),
+          barbearia.bairro.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          // Adicione a condição para area_atendimento aqui
+          (barbearia.area_atendimento &&
+            barbearia.area_atendimento
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())),
       );
       setFilteredBarbearias(filtered);
     }
   }, [searchQuery, barbearias]);
 
+  // Adicione este useEffect para reagir a mudanças no searchParams (se o usuário navegar diretamente com a URL)
+  useEffect(() => {
+    const paramSearch = searchParams.get("search") || "";
+    if (paramSearch !== searchQuery) {
+      setSearchQuery(paramSearch);
+    }
+  }, [searchParams]); // Dependência em searchParams para reagir a mudanças de URL
+
   const loadBarbearias = async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await barbeariaService.getAllBarbearias();
+      const data = await barbeariaService.getAllBarbearias(); //
       setBarbearias(data);
-      setFilteredBarbearias(data);
+      // Aplica o filtro inicial se houver um search param na URL
+      if (initialSearchQuery) {
+        const filtered = data.filter(
+          (barbearia: any) =>
+            barbearia.nome
+              .toLowerCase()
+              .includes(initialSearchQuery.toLowerCase()) ||
+            barbearia.cidade
+              .toLowerCase()
+              .includes(initialSearchQuery.toLowerCase()) ||
+            barbearia.bairro
+              .toLowerCase()
+              .includes(initialSearchQuery.toLowerCase()) ||
+            (barbearia.area_atendimento &&
+              barbearia.area_atendimento
+                .toLowerCase()
+                .includes(initialSearchQuery.toLowerCase())),
+        );
+        setFilteredBarbearias(filtered);
+      } else {
+        setFilteredBarbearias(data);
+      }
     } catch (err: any) {
       console.error("Erro ao carregar barbearias:", err);
       setError("Erro ao carregar as barbearias. Tente novamente.");
