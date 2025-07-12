@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -13,10 +11,12 @@ import Header from "@/components/header";
 import BarbershopCardMobile from "./_components/mobile";
 import BarbershopCardDesktop from "./_components/desktop";
 import { useSearchParams } from "next/navigation";
+import axios from "axios";
+import { Barbearia } from "@/lib/model/barbearia";
 
 const Home = () => {
-  const [barbearias, setBarbearias] = useState<any[]>([]);
-  const [filteredBarbearias, setFilteredBarbearias] = useState<any[]>([]);
+  const [barbearias, setBarbearias] = useState<Barbearia[]>([]);
+  const [filteredBarbearias, setFilteredBarbearias] = useState<Barbearia[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -56,17 +56,17 @@ const Home = () => {
     if (paramSearch !== searchQuery) {
       setSearchQuery(paramSearch);
     }
-  }, [searchParams]);
+  }, [searchParams, searchQuery]);
 
   const loadBarbearias = async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await barbeariaService.getAllBarbearias();
+      const data: Barbearia[] = await barbeariaService.getAllBarbearias();
       setBarbearias(data);
       if (initialSearchQuery) {
         const filtered = data.filter(
-          (barbearia: any) =>
+          (barbearia: Barbearia) =>
             barbearia.nome
               .toLowerCase()
               .includes(initialSearchQuery.toLowerCase()) ||
@@ -85,9 +85,20 @@ const Home = () => {
       } else {
         setFilteredBarbearias(data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro ao carregar barbearias:", err);
-      setError("Erro ao carregar as barbearias. Tente novamente.");
+      if (axios.isAxiosError(err)) {
+        console.error("Detalhes do erro Axios:", err.response?.data);
+        setError(
+          `Erro ao carregar as barbearias: ${err.response?.data?.message || err.message}`,
+        );
+      } else if (err instanceof Error) {
+        setError(`Erro ao carregar as barbearias: ${err.message}`);
+      } else {
+        setError(
+          "Erro desconhecido ao carregar as barbearias. Tente novamente.",
+        );
+      }
       setBarbearias([]);
       setFilteredBarbearias([]);
     } finally {
@@ -101,8 +112,11 @@ const Home = () => {
       if (savedFavorites) {
         setFavorites(new Set(JSON.parse(savedFavorites)));
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Erro ao carregar favoritos:", error);
+      if (error instanceof Error) {
+        console.error("Detalhes do erro:", error.message);
+      }
     }
   };
 
@@ -112,8 +126,11 @@ const Home = () => {
         "barbershop-favorites",
         JSON.stringify([...newFavorites]),
       );
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Erro ao salvar favoritos:", error);
+      if (error instanceof Error) {
+        console.error("Detalhes do erro:", error.message);
+      }
     }
   };
 
@@ -128,11 +145,11 @@ const Home = () => {
     saveFavorites(newFavorites);
   };
 
-  const getFavoriteShops = () => {
+  const getFavoriteShops = (): Barbearia[] => {
     return barbearias.filter((shop) => favorites.has(shop.id));
   };
 
-  const getTopRatedShops = () => {
+  const getTopRatedShops = (): Barbearia[] => {
     return [...barbearias].sort((a, b) => b.rating - a.rating).slice(0, 10);
   };
 
@@ -170,7 +187,7 @@ const Home = () => {
     title,
     scrollRef,
   }: {
-    shops: any[];
+    shops: Barbearia[];
     title: string;
     scrollRef: React.RefObject<HTMLDivElement | null>;
   }) => {

@@ -31,4 +31,7 @@ export interface Barbearia {
   numero: string;
   complemento: string;
   createdAt: string;
+  rating: number;
+  reviews: number;
+  description: string;
 }
