@@ -148,7 +148,7 @@ const Home = () => {
 
       {!hasActiveSearch && favoriteShops.length > 0 && (
         <div className="mx-auto mb-8 w-full max-w-7xl px-4">
-          <h2 className="mb-4 text-center text-2xl font-bold text-gray-600">
+          <h2 className="mb-4 text-center text-2xl font-bold text-white">
             Meus Favoritos
           </h2>
           <div className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden">
@@ -175,7 +175,7 @@ const Home = () => {
 
       {!hasActiveSearch && (
         <div className="mx-auto mb-8 w-full max-w-7xl px-4">
-          <h2 className="mb-4 text-center text-2xl font-bold text-gray-600">
+          <h2 className="mb-4 text-center text-2xl font-bold text-white">
             Barbearias
           </h2>
           <div className="flex gap-4 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden">
@@ -203,7 +203,7 @@ const Home = () => {
       <div className="mx-auto w-full max-w-7xl px-4">
         {!hasActiveSearch && (
           <div className="mb-6 flex items-center justify-center gap-2">
-            <h2 className="text-center text-2xl font-bold text-gray-600">
+            <h2 className="text-center text-2xl font-bold text-white">
               Melhores Avaliados
             </h2>
           </div>
