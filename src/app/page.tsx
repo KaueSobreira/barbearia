@@ -17,7 +17,6 @@ import axios from "axios";
 import {
   Select,
   SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -36,20 +35,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-
-interface Barbearia {
-  id: string;
-  nome: string;
-  cidade: string;
-  bairro: string;
-  area_atendimento?: string;
-  logradouro: string;
-  numero: string;
-  image: string;
-  rating: number;
-  reviews: number;
-  description: string;
-}
+import { Barbearia } from "@/lib/model/barbearia";
 
 const CITY_STORAGE_KEY = "user_selected_city";
 
