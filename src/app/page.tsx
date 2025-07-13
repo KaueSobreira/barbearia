@@ -1,3 +1,5 @@
+// app/page.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -15,6 +17,7 @@ import axios from "axios";
 import {
   Select,
   SelectContent,
+  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -33,7 +36,35 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Barbearia } from "@/lib/model/barbearia";
+
+interface Barbearia {
+  id: string;
+  nome: string;
+  cidade: string;
+  bairro: string;
+  area_atendimento?: string;
+  logradouro: string;
+  numero: string;
+  image: string;
+  rating: number;
+  reviews: number;
+  description: string;
+}
+
+const CITY_STORAGE_KEY = "user_selected_city";
+
+const saveCityToLocalStorage = (city: string) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(CITY_STORAGE_KEY, city);
+  }
+};
+
+const getCityFromLocalStorage = (): string | null => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem(CITY_STORAGE_KEY);
+  }
+  return null;
+};
 
 const Home = () => {
   const [barbearias, setBarbearias] = useState<Barbearia[]>([]);
@@ -46,11 +77,17 @@ const Home = () => {
   const searchParams = useSearchParams();
   const initialSearchQuery = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+
   const [userCity, setUserCity] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string | null>(
+    getCityFromLocalStorage(),
+  );
+
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(
+    getCityFromLocalStorage() === null,
+  );
 
   const hasActiveSearch = searchQuery.trim() !== "";
 
@@ -59,7 +96,6 @@ const Home = () => {
   const allBarbeariasScrollRef = useRef<HTMLDivElement | null>(null);
   const searchResultsScrollRef = useRef<HTMLDivElement | null>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const extractCityFromNominatimResponse = (data: any): string | null => {
     if (data && data.address) {
       return (
@@ -105,7 +141,12 @@ const Home = () => {
   }, []);
 
   const getUserLocationAndFilter = useCallback(async () => {
-    if (barbearias.length === 0 || userCity || selectedCity) {
+    if (
+      barbearias.length === 0 ||
+      userCity ||
+      selectedCity ||
+      getCityFromLocalStorage()
+    ) {
       return;
     }
 
@@ -137,6 +178,7 @@ const Home = () => {
       if (detectedCity && availableCities.includes(detectedCity)) {
         setUserCity(detectedCity);
         setSelectedCity(detectedCity);
+        saveCityToLocalStorage(detectedCity);
         setShowLocationModal(false);
         setIsInitialLoad(false);
       } else {
@@ -162,7 +204,6 @@ const Home = () => {
       availableCities.length > 0 &&
       !userCity &&
       !selectedCity &&
-      !showLocationModal &&
       isInitialLoad
     ) {
       getUserLocationAndFilter();
@@ -173,7 +214,6 @@ const Home = () => {
     availableCities.length,
     userCity,
     selectedCity,
-    showLocationModal,
     isInitialLoad,
     getUserLocationAndFilter,
   ]);
@@ -303,6 +343,8 @@ const Home = () => {
 
   const handleCitySelect = (city: string) => {
     setSelectedCity(city);
+    setUserCity(null);
+    saveCityToLocalStorage(city);
     setSearchQuery("");
     setShowLocationModal(false);
     setIsInitialLoad(false);
@@ -332,7 +374,13 @@ const Home = () => {
     );
   }
 
-  if (isInitialLoad && showLocationModal && !selectedCity && !userCity) {
+  if (
+    isInitialLoad &&
+    !selectedCity &&
+    !userCity &&
+    barbearias.length > 0 &&
+    availableCities.length > 0
+  ) {
     return (
       <div className="min-h-screen">
         <Header />
@@ -350,8 +398,7 @@ const Home = () => {
             <DialogHeader>
               <DialogTitle>Selecione sua Localização</DialogTitle>
               <DialogDescription className="mb-4">
-                Não conseguimos detectar sua cidade ou ela não está em nossos
-                registros. Por favor, selecione sua cidade na lista.
+                Para continuar, por favor, selecione sua cidade na lista.
               </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-4">
@@ -475,6 +522,7 @@ const Home = () => {
           </Alert>
         </div>
       )}
+
       {!hasActiveSearch && (selectedCity || userCity) && (
         <div className="pb-5 pl-10 font-bold text-gray-300">
           <h1>Kaue Sobreira Lucena</h1>
@@ -491,6 +539,7 @@ const Home = () => {
           )}
         </div>
       )}
+
       {hasActiveSearch &&
         (filteredBarbeariasBySearch.length === 0 ? (
           <div className="py-16 text-center">
