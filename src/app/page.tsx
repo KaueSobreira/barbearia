@@ -36,6 +36,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Barbearia } from "@/lib/model/barbearia";
+import { useSession } from "next-auth/react";
 
 const CITY_STORAGE_KEY = "user_selected_city";
 
@@ -53,6 +54,7 @@ const getCityFromLocalStorage = (): string | null => {
 };
 
 const Home = () => {
+  const { data: session } = useSession();
   const [barbearias, setBarbearias] = useState<Barbearia[]>([]);
   const [filteredBarbeariasBySearch, setFilteredBarbeariasBySearch] = useState<
     Barbearia[]
@@ -366,6 +368,7 @@ if (!hasMounted) return null;
     </div>
   );
 }
+  
 
   if (
     isInitialLoad &&
@@ -518,7 +521,9 @@ if (!hasMounted) return null;
 
       {!hasActiveSearch && (selectedCity || userCity) && (
         <div className="pb-5 pl-10 font-bold text-gray-300">
-          <h1>Kaue Sobreira Lucena</h1>
+          <h2 className="font-bold">
+            {session ? `Olá, ${session.user?.name}` : "Olá, Faça seu Login!"}
+          </h2>
           <p className="text-sm font-semibold">Domingo, 08 Julho de 2025</p>
           {userCity && (
             <p className="text-sm font-semibold">

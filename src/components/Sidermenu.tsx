@@ -16,7 +16,7 @@ import {
 import { categoryOptions } from "@/lib/model/category";
 import { useRouter } from "next/navigation";
 
-import { signIn, signOut, useSession } from "next-auth/react";  // <-- Importa aqui
+import { signIn, signOut, useSession } from "next-auth/react"; // <-- Importa aqui
 
 const SiderMenu = () => {
   const router = useRouter();
@@ -35,9 +35,23 @@ const SiderMenu = () => {
       <div className="flex items-center justify-between gap-3 border-b border-solid py-5">
         {/* DADOS DO USUARIO */}
         <>
-          <h2 className="font-bold">
-            {session ? `Olá, ${session.user?.name}` : "Olá, Faça seu Login!"}
-          </h2>
+          <div className="flex items-center gap-2">
+            {session ? (
+              <>
+                <Image
+                  src={session.user?.image || "/default-avatar.png"}
+                  alt="Foto do usuário"
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+                <h2 className="font-bold">Olá, {session.user?.name}</h2>
+              </>
+            ) : (
+              <h2 className="font-bold">Olá, Faça seu Login!</h2>
+            )}
+          </div>
+
           {!session && (
             <Dialog>
               <DialogTrigger asChild>
@@ -111,7 +125,11 @@ const SiderMenu = () => {
       {/* SAIR */}
       <div className="flex flex-col gap-2 border-b border-solid py-5">
         {session && (
-          <Button variant={"ghost"} className="justify-start gap-2" onClick={() => signOut()}>
+          <Button
+            variant={"ghost"}
+            className="justify-start gap-2"
+            onClick={() => signOut()}
+          >
             <LogOutIcon />
             Sair da Conta
           </Button>
