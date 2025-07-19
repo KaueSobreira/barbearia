@@ -1,4 +1,3 @@
-// components/SiderMenu.tsx
 "use client";
 
 import { Button } from "./ui/button";
@@ -15,13 +14,17 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { categoryOptions } from "@/lib/model/category";
-import { useRouter } from "next/navigation"; // Importar useRouter
+import { useRouter } from "next/navigation";
+
+import { signIn, signOut, useSession } from "next-auth/react";  // <-- Importa aqui
 
 const SiderMenu = () => {
-  const router = useRouter(); // Inicializar useRouter
+  const router = useRouter();
+
+  const { data: session } = useSession(); // <-- Usa o hook para pegar sessão
 
   const handleCategoryClick = (categoryTitle: string) => {
-    router.push(`/?search=${encodeURIComponent(categoryTitle)}`); // Redirecionar com o parâmetro de busca
+    router.push(`/?search=${encodeURIComponent(categoryTitle)}`);
   };
 
   return (
@@ -32,31 +35,39 @@ const SiderMenu = () => {
       <div className="flex items-center justify-between gap-3 border-b border-solid py-5">
         {/* DADOS DO USUARIO */}
         <>
-          <h2 className="font-bold">Olá, Faça seu Login!</h2>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="icon" className="text-white">
-                <LogInIcon />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="w-[90%]">
-              <DialogHeader>
-                <DialogTitle>Faça Login na plataforma!</DialogTitle>
-                <DialogDescription>
-                  Conecte-se usando sua conta no Google!
-                </DialogDescription>
-              </DialogHeader>
-              <Button variant="outline" className="gap-1 font-bold">
-                <Image
-                  alt="Fazer Login com Google"
-                  src="/google.png"
-                  width={18}
-                  height={18}
-                />
-                Faça Login com Google
-              </Button>
-            </DialogContent>
-          </Dialog>
+          <h2 className="font-bold">
+            {session ? `Olá, ${session.user?.name}` : "Olá, Faça seu Login!"}
+          </h2>
+          {!session && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="icon" className="text-white">
+                  <LogInIcon />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="w-[90%]">
+                <DialogHeader>
+                  <DialogTitle>Faça Login na plataforma!</DialogTitle>
+                  <DialogDescription>
+                    Conecte-se usando sua conta no Google!
+                  </DialogDescription>
+                </DialogHeader>
+                <Button
+                  variant="outline"
+                  className="gap-1 font-bold"
+                  onClick={() => signIn("google")}
+                >
+                  <Image
+                    alt="Fazer Login com Google"
+                    src="/google.png"
+                    width={18}
+                    height={18}
+                  />
+                  Faça Login com Google
+                </Button>
+              </DialogContent>
+            </Dialog>
+          )}
         </>
       </div>
       {/* parte inicial do menu do cliente */}
@@ -81,7 +92,6 @@ const SiderMenu = () => {
       <div className="flex flex-col gap-2 border-b border-solid py-5">
         {categoryOptions.map((option) => (
           <SheetClose key={option.title} asChild>
-            {/* Alterado para usar onClick e handleCategoryClick */}
             <Button
               className="justify-start gap-2"
               variant={"ghost"}
@@ -100,10 +110,12 @@ const SiderMenu = () => {
       </div>
       {/* SAIR */}
       <div className="flex flex-col gap-2 border-b border-solid py-5">
-        <Button variant={"ghost"} className="justify-start gap-2">
-          <LogOutIcon />
-          Sair da Conta
-        </Button>
+        {session && (
+          <Button variant={"ghost"} className="justify-start gap-2" onClick={() => signOut()}>
+            <LogOutIcon />
+            Sair da Conta
+          </Button>
+        )}
       </div>
     </SheetContent>
   );
