@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/command";
 import { Barbearia } from "@/lib/model/barbearia";
 import { useSession } from "next-auth/react";
+import DataAtual from "./_components/date_dinamic";
 
 const CITY_STORAGE_KEY = "user_selected_city";
 
@@ -339,11 +340,11 @@ const Home = () => {
   };
   const [hasMounted, setHasMounted] = useState(false);
 
-useEffect(() => {
-  setHasMounted(true);
-}, []);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
-if (!hasMounted) return null;
+  if (!hasMounted) return null;
 
   const favoriteShops = getFavoriteShops();
   const barbeariasInCurrentCity = getBarbeariasByCurrentCity();
@@ -359,16 +360,15 @@ if (!hasMounted) return null;
   };
 
   if (loading && barbearias.length === 0 && isInitialLoad) {
-  return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="text-center">
-        <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
-        <p className="mt-2 text-gray-600">Carregando dados...</p>
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
+          <p className="mt-2 text-gray-600">Carregando dados...</p>
+        </div>
       </div>
-    </div>
-  );
-}
-  
+    );
+  }
 
   if (
     isInitialLoad &&
@@ -524,7 +524,7 @@ if (!hasMounted) return null;
           <h2 className="font-bold">
             {session ? `Olá, ${session.user?.name}` : "Olá, Faça seu Login!"}
           </h2>
-          <p className="text-sm font-semibold">Domingo, 08 Julho de 2025</p>
+          <DataAtual />
           {userCity && (
             <p className="text-sm font-semibold">
               Cidade detectada: {userCity}
