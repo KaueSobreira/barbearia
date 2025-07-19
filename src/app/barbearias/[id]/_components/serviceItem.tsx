@@ -20,14 +20,15 @@ import {
 import { Servico } from "@/lib/model/servico";
 import { User } from "lucide-react";
 import BookingCalendar from "./booking";
+import { useSession, signIn } from "next-auth/react";
 
 const SERVICE_IMAGES = [
-  "https://images.unsplash.com/photo-1622287162716-f311baa1a2b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", // Corte masculino
-  "https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", // Barba
-  "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", // Corte + Barba
-  "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", // Sobrancelha
-  "https://images.unsplash.com/photo-1437719417032-8595fd9e9dc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", // Tratamento
-  "https://images.unsplash.com/photo-1605497788044-5a32c7078486?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80", // Infantil
+  "https://images.unsplash.com/photo-1622287162716-f311baa1a2b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1437719417032-8595fd9e9dc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1605497788044-5a32c7078486?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
 ];
 
 const BARBEIROS = [
@@ -56,10 +57,12 @@ const ServiceItem = ({
   servico: Servico;
   barbearia: any;
 }) => {
+  const { data: session } = useSession();
   const [barberSelectionOpen, setBarberSelectionOpen] = useState(false);
   const [bookingSheetIsOpen, setBookingSheetIsOpen] = useState(false);
   const [selectedBarber, setSelectedBarber] = useState<Barbeiro | null>(null);
   const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
 
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat("pt-BR", {
@@ -69,6 +72,11 @@ const ServiceItem = ({
   };
 
   const handleBookingClick = () => {
+    if (!session) {
+      setLoginDialogOpen(true); // Abre modal de login se não estiver logado
+      return;
+    }
+
     console.log(
       `Iniciando processo de reserva: ${servico.nome} na barbearia: ${barbearia?.nome}`,
     );
@@ -85,7 +93,6 @@ const ServiceItem = ({
   const handleBookingSheetOpenChange = (open: boolean) => {
     setBookingSheetIsOpen(open);
     if (!open) {
-      // Reset states quando fechar o sheet
       setSelectedBarber(null);
       setSelectedDateTime(null);
     }
@@ -105,11 +112,14 @@ const ServiceItem = ({
       barbearia: barbearia?.nome,
     });
 
-    // Aqui você faria a chamada para a API para criar o agendamento
-    // createBooking({ serviceId: servico.id, barberId: selectedBarber.id, dateTime: selectedDateTime })
-
     alert(
-      `Agendamento confirmado!\n\nServiço: ${servico.nome}\nBarbeiro: ${selectedBarber.nome}\nData: ${selectedDateTime.toLocaleDateString("pt-BR")}\nHorário: ${selectedDateTime.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`,
+      `Agendamento confirmado!\n\nServiço: ${servico.nome}\nBarbeiro: ${selectedBarber.nome}\nData: ${selectedDateTime.toLocaleDateString("pt-BR")}\nHorário: ${selectedDateTime.toLocaleTimeString(
+        "pt-BR",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        },
+      )}`,
     );
 
     handleBookingSheetOpenChange(false);
@@ -126,7 +136,6 @@ const ServiceItem = ({
     <>
       <Card>
         <CardContent className="flex items-center gap-3">
-          {/* IMAGEM */}
           <div className="relative max-h-[110px] min-h-[110px] max-w-[110px] min-w-[110px]">
             <Image
               alt={servico.nome}
@@ -136,12 +145,10 @@ const ServiceItem = ({
             />
           </div>
 
-          {/* direita */}
           <div className="flex-1 space-y-4">
             <h3 className="text-sm font-semibold">{servico.nome}</h3>
             <p className="text-sm text-gray-400">{servico.descricao}</p>
 
-            {/* preco */}
             <div className="flex items-center justify-between">
               <p className="text-1xl font-bold text-white">
                 {formatPrice(servico.preco)}
@@ -159,6 +166,32 @@ const ServiceItem = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Dialog de Login */}
+      <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
+        <DialogContent className="w-[90%]">
+          <DialogHeader>
+            <DialogTitle>Faça Login para Reservar</DialogTitle>
+            <DialogDescription>
+              É necessário estar logado para reservar um serviço. Faça login com
+              sua conta Google.
+            </DialogDescription>
+          </DialogHeader>
+          <Button
+            variant="outline"
+            className="gap-1 font-bold"
+            onClick={() => signIn("google")}
+          >
+            <Image
+              alt="Fazer Login com Google"
+              src="/google.png"
+              width={18}
+              height={18}
+            />
+            Login com Google
+          </Button>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog de Seleção de Barbeiro */}
       <Dialog open={barberSelectionOpen} onOpenChange={setBarberSelectionOpen}>
@@ -182,7 +215,6 @@ const ServiceItem = ({
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
-                    {/* Foto do Barbeiro */}
                     <div className="relative h-16 w-16 flex-shrink-0">
                       <Image
                         alt={barbeiro.nome}
@@ -191,13 +223,9 @@ const ServiceItem = ({
                         className="rounded-full object-cover"
                       />
                     </div>
-
-                    {/* Informações do Barbeiro */}
                     <div className="flex-1 space-y-1">
                       <h3 className="text-lg font-semibold">{barbeiro.nome}</h3>
                     </div>
-
-                    {/* Botão Escolher */}
                     <Button
                       onClick={() => handleBarberSelect(barbeiro)}
                       className="bg-blue-600 text-white hover:bg-blue-700"
@@ -222,9 +250,7 @@ const ServiceItem = ({
             <SheetTitle>Fazer Reserva</SheetTitle>
           </SheetHeader>
 
-          {/* Resumo do Serviço e Barbeiro */}
           <div className="space-y-4 border-b px-5 py-4">
-            {/* Informações do Serviço */}
             <div className="flex items-center gap-3">
               <div className="relative h-16 w-16">
                 <Image
@@ -245,7 +271,6 @@ const ServiceItem = ({
               </div>
             </div>
 
-            {/* Barbeiro Selecionado */}
             {selectedBarber && (
               <div className="flex items-center gap-3">
                 <div className="relative h-12 w-12">
@@ -264,7 +289,6 @@ const ServiceItem = ({
             )}
           </div>
 
-          {/* Calendário de Agendamento */}
           {selectedBarber && (
             <BookingCalendar
               serviceId={servico.id}

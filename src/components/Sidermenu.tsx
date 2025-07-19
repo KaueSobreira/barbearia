@@ -17,14 +17,23 @@ import { categoryOptions } from "@/lib/model/category";
 import { useRouter } from "next/navigation";
 
 import { signIn, signOut, useSession } from "next-auth/react"; // <-- Importa aqui
+import { useState } from "react";
 
 const SiderMenu = () => {
   const router = useRouter();
 
   const { data: session } = useSession(); // <-- Usa o hook para pegar sessão
 
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const handleCategoryClick = (categoryTitle: string) => {
     router.push(`/?search=${encodeURIComponent(categoryTitle)}`);
+  };
+  const handleAgendamentoClick = () => {
+    if (!session) {
+      setLoginDialogOpen(true); // se não logado, abre modal
+    } else {
+      router.push("/bookings"); // se logado, redireciona
+    }
   };
 
   return (
@@ -94,12 +103,43 @@ const SiderMenu = () => {
             </Link>
           </Button>
         </SheetClose>
-        <Button className="justify-start gap-2" variant={"ghost"} asChild>
-          <Link href="/bookings">
+        <>
+          <Button
+            className="justify-start gap-2"
+            variant={"ghost"}
+            onClick={handleAgendamentoClick}
+          >
             <CalendarIcon size={18} />
             Agendamento
-          </Link>
-        </Button>
+          </Button>
+
+          {/* Dialog para login, só aparece se loginDialogOpen estiver true */}
+          <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
+            <DialogContent className="w-[90%]">
+              <DialogHeader>
+                <DialogTitle>
+                  Faça login para acessar seus agendamentos
+                </DialogTitle>
+                <DialogDescription>
+                  É necessário estar logado para visualizar seus agendamentos.
+                </DialogDescription>
+              </DialogHeader>
+              <Button
+                variant="outline"
+                className="gap-1 font-bold"
+                onClick={() => signIn("google")}
+              >
+                <Image
+                  alt="Fazer Login com Google"
+                  src="/google.png"
+                  width={18}
+                  height={18}
+                />
+                Login com Google
+              </Button>
+            </DialogContent>
+          </Dialog>
+        </>
       </div>
 
       <h1 className="text-sm font-semibold">CATEGORIAS DE BUSCA</h1>
