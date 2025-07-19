@@ -16,13 +16,13 @@ import {
 import { categoryOptions } from "@/lib/model/category";
 import { useRouter } from "next/navigation";
 
-import { signIn, signOut, useSession } from "next-auth/react"; // <-- Importa aqui
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 
 const SiderMenu = () => {
   const router = useRouter();
 
-  const { data: session } = useSession(); // <-- Usa o hook para pegar sessão
+  const { data: session } = useSession();
 
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const handleCategoryClick = (categoryTitle: string) => {
@@ -30,9 +30,9 @@ const SiderMenu = () => {
   };
   const handleAgendamentoClick = () => {
     if (!session) {
-      setLoginDialogOpen(true); // se não logado, abre modal
+      setLoginDialogOpen(true);
     } else {
-      router.push("/bookings"); // se logado, redireciona
+      router.push("/bookings");
     }
   };
 

@@ -4,40 +4,20 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { barbeariaService } from "@/lib/api/list-barbearia";
 import Header from "@/components/header";
-import BarbershopCardMobile from "./_components/mobile";
-import BarbershopCardDesktop from "./_components/desktop";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
-import {
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { Barbearia } from "@/lib/model/barbearia";
 import { useSession } from "next-auth/react";
 import DataAtual from "./_components/date_dinamic";
+
+// Import the new components
+import CitySelectorModal from "./_components/CitySelectorModal";
+import BarbershopCarousel from "./_components/BarbershopCarousel";
+import ErrorAlert from "./_components/ErrorAlert";
 
 const CITY_STORAGE_KEY = "user_selected_city";
 
@@ -80,10 +60,10 @@ const Home = () => {
 
   const hasActiveSearch = searchQuery.trim() !== "";
 
-  const favoriteScrollRef = useRef<HTMLDivElement | null>(null);
-  const topRatedScrollRef = useRef<HTMLDivElement | null>(null);
-  const allBarbeariasScrollRef = useRef<HTMLDivElement | null>(null);
-  const searchResultsScrollRef = useRef<HTMLDivElement | null>(null);
+  const favoriteScrollRef = useRef<HTMLDivElement>(null);
+  const topRatedScrollRef = useRef<HTMLDivElement>(null);
+  const allBarbeariasScrollRef = useRef<HTMLDivElement>(null);
+  const searchResultsScrollRef = useRef<HTMLDivElement>(null);
 
   const extractCityFromNominatimResponse = (data: any): string | null => {
     if (data && data.address) {
@@ -350,15 +330,6 @@ const Home = () => {
   const barbeariasInCurrentCity = getBarbeariasByCurrentCity();
   const topRatedShopsInCurrentCity = getTopRatedShopsByCity();
 
-  const scrollAmount = 450;
-  const scrollLeft = (ref: React.RefObject<HTMLDivElement | null>) => {
-    ref.current?.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-  };
-
-  const scrollRight = (ref: React.RefObject<HTMLDivElement | null>) => {
-    ref.current?.scrollBy({ left: scrollAmount, behavior: "smooth" });
-  };
-
   if (loading && barbearias.length === 0 && isInitialLoad) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -380,7 +351,7 @@ const Home = () => {
     return (
       <div className="min-h-screen">
         <Header />
-        <Dialog
+        <CitySelectorModal
           open={showLocationModal}
           onOpenChange={(open) => {
             if (!open && !selectedCity && !userCity) {
@@ -389,112 +360,14 @@ const Home = () => {
               setShowLocationModal(open);
             }
           }}
-        >
-          <DialogContent className="w-[90%] rounded-lg p-6 md:w-auto">
-            <DialogHeader>
-              <DialogTitle>Selecione sua Localização</DialogTitle>
-              <DialogDescription className="mb-4">
-                Para continuar, por favor, selecione sua cidade na lista.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="mt-4 space-y-4">
-              <Select
-                onValueChange={handleCitySelect}
-                value={selectedCity || ""}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione sua cidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  <Command>
-                    <CommandInput placeholder="Buscar cidade..." />
-                    <CommandList>
-                      <CommandEmpty>Nenhuma cidade encontrada.</CommandEmpty>
-                      <CommandGroup>
-                        {availableCities.map((city) => (
-                          <CommandItem
-                            key={city}
-                            value={city}
-                            onSelect={handleCitySelect}
-                          >
-                            {city}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </SelectContent>
-              </Select>
-              {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
-            </div>
-          </DialogContent>
-        </Dialog>
+          availableCities={availableCities}
+          selectedCity={selectedCity}
+          handleCitySelect={handleCitySelect}
+          error={error}
+        />
       </div>
     );
   }
-
-  const BarbershopCarousel = ({
-    shops,
-    title,
-    scrollRef,
-  }: {
-    shops: Barbearia[];
-    title: string;
-    scrollRef: React.RefObject<HTMLDivElement | null>;
-  }) => {
-    if (shops.length === 0) return null;
-
-    return (
-      <div className="relative mx-auto mb-8 w-full max-w-7xl px-4">
-        <h2 className="mb-4 text-center text-2xl font-bold text-white">
-          {title}
-        </h2>
-        <div className="group relative md:px-12">
-          <Button
-            onClick={() => scrollLeft(scrollRef)}
-            className="group bg-opacity-70 absolute top-1/2 left-[-20px] z-20 hidden -translate-y-1/2 rounded-full bg-transparent p-3 pr-4 text-white shadow-lg ring-0 transition-all duration-300 hover:bg-transparent focus:bg-transparent focus:ring-0 focus:outline-none active:bg-transparent md:block"
-            asChild
-          >
-            <ChevronLeft className="h-20 w-20 transform transition-transform duration-300 group-hover:scale-110" />
-          </Button>
-
-          <div
-            ref={scrollRef}
-            className="flex gap-4 overflow-x-auto scroll-smooth pb-4 [&::-webkit-scrollbar]:hidden"
-          >
-            {shops.map((shop) => (
-              <Card
-                key={shop.id}
-                className="flex-shrink-0 overflow-hidden border-0 !bg-transparent shadow-lg"
-              >
-                <div className="md:hidden">
-                  <BarbershopCardMobile
-                    shop={shop}
-                    isFavorite={favorites.has(shop.id)}
-                    onToggleFavorite={() => toggleFavorite(shop.id)}
-                  />
-                </div>
-                <div className="hidden md:block">
-                  <BarbershopCardDesktop
-                    shop={shop}
-                    isFavorite={favorites.has(shop.id)}
-                    onToggleFavorite={() => toggleFavorite(shop.id)}
-                  />
-                </div>
-              </Card>
-            ))}
-          </div>
-          <Button
-            onClick={() => scrollRight(scrollRef)}
-            className="group bg-opacity-70 absolute top-1/2 right-[-20px] z-20 hidden -translate-y-1/2 rounded-full bg-transparent p-3 pl-4 text-white shadow-lg ring-0 transition-all duration-300 hover:bg-transparent focus:bg-transparent focus:ring-0 focus:outline-none active:bg-transparent md:block"
-            asChild
-          >
-            <ChevronRight className="h-20 w-20 transform transition-transform duration-300 group-hover:scale-110" />
-          </Button>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen">
@@ -510,14 +383,7 @@ const Home = () => {
         />
       </div>
 
-      {error && (
-        <div className="mx-auto mb-4 max-w-md px-4">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        </div>
-      )}
+      {error && <ErrorAlert message={error} />}
 
       {!hasActiveSearch && (selectedCity || userCity) && (
         <div className="pb-5 pl-10 font-bold text-gray-300">
@@ -562,6 +428,8 @@ const Home = () => {
             shops={filteredBarbeariasBySearch}
             title={`Resultados para "${searchQuery}" em ${selectedCity || userCity}`}
             scrollRef={searchResultsScrollRef}
+            favorites={favorites}
+            toggleFavorite={toggleFavorite}
           />
         ))}
 
@@ -572,6 +440,8 @@ const Home = () => {
               shops={favoriteShops}
               title="Meus Favoritos"
               scrollRef={favoriteScrollRef}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
             />
           )}
 
@@ -580,6 +450,8 @@ const Home = () => {
               shops={barbeariasInCurrentCity}
               title={`Todas as Barbearias em ${selectedCity || userCity}`}
               scrollRef={allBarbeariasScrollRef}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
             />
           )}
 
@@ -588,6 +460,8 @@ const Home = () => {
               shops={topRatedShopsInCurrentCity}
               title={`Melhores Avaliados em ${selectedCity || userCity}`}
               scrollRef={topRatedScrollRef}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
             />
           )}
         </>
