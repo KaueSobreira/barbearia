@@ -335,6 +335,13 @@ const Home = () => {
     setShowLocationModal(false);
     setIsInitialLoad(false);
   };
+  const [hasMounted, setHasMounted] = useState(false);
+
+useEffect(() => {
+  setHasMounted(true);
+}, []);
+
+if (!hasMounted) return null;
 
   const favoriteShops = getFavoriteShops();
   const barbeariasInCurrentCity = getBarbeariasByCurrentCity();
@@ -350,15 +357,15 @@ const Home = () => {
   };
 
   if (loading && barbearias.length === 0 && isInitialLoad) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
-          <p className="mt-2 text-gray-600">Carregando dados...</p>
-        </div>
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
+        <p className="mt-2 text-gray-600">Carregando dados...</p>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (
     isInitialLoad &&

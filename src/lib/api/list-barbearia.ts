@@ -8,6 +8,8 @@ const api = axios.create({
   },
 });
 
+console.log("Axios BaseURL (Barbearia Service):", api.defaults.baseURL);
+
 const images = [
   "https://images.unsplash.com/photo-1437719417032-8595fd9e9dc6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80",
   "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
@@ -24,16 +26,27 @@ const bgImages = [
 
 export const barbeariaService = {
   async getAllBarbearias() {
-    const response = await api.get("/barbearia/fetch-barber-shops", {});
-    const barbearias = response.data.barberShops || [];
+    try {
+      console.log("Tentando buscar barbearias do endpoint:", `${api.defaults.baseURL}/barbearia/fetch-barber-shops`); // Log mais específico
+      const response = await api.get("/barbearia/fetch-barber-shops", {});
 
-    return barbearias.map((barbearia: Barbearia, index: number) => ({
-      ...barbearia,
-      image: images[index % images.length],
-      bgImage: bgImages[index % bgImages.length],
-      rating: Number((4.5 + Math.random() * 0.5).toFixed(1)),
-      reviews: Math.floor(Math.random() * 100) + 20,
-      description: `${barbearia.area_atendimento} localizada em ${barbearia.bairro}. Profissionais experientes e ambiente aconchegante.`,
-    }));
+      const barbearias = response.data as Barbearia[]; 
+
+
+      console.log("Dados brutos da API recebidos:", response.data); 
+      console.log("Barbearias extraídas para processamento:", barbearias.length, "itens.");
+
+      return barbearias.map((barbearia: Barbearia, index: number) => ({
+        ...barbearia,
+        image: images[index % images.length],
+        bgImage: bgImages[index % bgImages.length],
+        rating: Number((4.5 + Math.random() * 0.5).toFixed(1)),
+        reviews: Math.floor(Math.random() * 100) + 20,
+        description: `${barbearia.area_atendimento} localizada em ${barbearia.bairro}. Profissionais experientes e ambiente aconchegante.`,
+      }));
+    } catch (error) {
+      console.error("Erro ao chamar a API de barbearias em list-barbearia.ts:", error);
+      throw error;
+    }
   },
 };
