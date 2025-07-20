@@ -50,6 +50,10 @@ const Home = () => {
   );
 
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showManualCitySelector, setShowManualCitySelector] = useState(false);
+
+  const [locationErrorMsg, setLocationErrorMsg] = useState<string | null>(null);
+
   const [availableCities, setAvailableCities] = useState<string[]>([]);
 
   const [isInitialLoad, setIsInitialLoad] = useState(
@@ -93,10 +97,9 @@ const Home = () => {
     }
   }, []);
 
-  // Função para pegar a localização do usuário e extrair cidade pelo Nominatim
-  const getCityFromUserLocation = useCallback(() => {
+  const getCityFromUserLocation = () => {
     if (!navigator.geolocation) {
-      console.log("Geolocalização não suportada pelo navegador.");
+      setLocationErrorMsg("Geolocalização não suportada pelo navegador.");
       setShowLocationModal(true);
       return;
     }
@@ -123,36 +126,53 @@ const Home = () => {
             saveCityToLocalStorage(city);
             setIsInitialLoad(false);
             setShowLocationModal(false);
+            setLocationErrorMsg(null);
+            setShowManualCitySelector(false);
           } else {
-            // Se não achou a cidade, abrir modal para o usuário escolher manualmente
+            setLocationErrorMsg(
+              "Não foi possível determinar a cidade pela localização.",
+            );
             setShowLocationModal(true);
           }
         } catch (error) {
           console.error("Erro ao consultar Nominatim:", error);
+          setLocationErrorMsg(
+            "Erro ao consultar localização. Por favor, selecione manualmente.",
+          );
           setShowLocationModal(true);
         }
       },
       (error) => {
-        console.error("Erro ao obter localização:", error.message);
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationErrorMsg(
+            "Permissão para localização negada. Por favor, habilite-a ou selecione manualmente.",
+          );
+        } else {
+          setLocationErrorMsg(
+            "Erro ao obter localização: " +
+              error.message +
+              ". Por favor, selecione manualmente.",
+          );
+        }
         setShowLocationModal(true);
       },
       { timeout: 10000 },
     );
-  }, []);
+  };
 
   useEffect(() => {
     loadFavorites();
     loadBarbearias();
   }, [loadBarbearias]);
 
-  // Após carregar as barbearias, tenta pegar a localização do usuário se não tiver cidade salva
   useEffect(() => {
     if (
       !loading &&
       barbearias.length > 0 &&
       availableCities.length > 0 &&
       !selectedCity &&
-      isInitialLoad
+      isInitialLoad &&
+      !showManualCitySelector
     ) {
       getCityFromUserLocation();
     }
@@ -163,6 +183,7 @@ const Home = () => {
     selectedCity,
     isInitialLoad,
     getCityFromUserLocation,
+    showManualCitySelector,
   ]);
 
   useEffect(() => {
@@ -273,7 +294,15 @@ const Home = () => {
     saveCityToLocalStorage(city);
     setSearchQuery("");
     setShowLocationModal(false);
+    setShowManualCitySelector(false);
+    setLocationErrorMsg(null);
     setIsInitialLoad(false);
+  };
+
+  const handleChooseManual = () => {
+    setShowManualCitySelector(true);
+    setShowLocationModal(false);
+    setLocationErrorMsg(null);
   };
 
   const [hasMounted, setHasMounted] = useState(false);
@@ -287,7 +316,6 @@ const Home = () => {
   const barbeariasInCurrentCity = getBarbeariasByCurrentCity();
   const topRatedShopsInCurrentCity = getTopRatedShopsByCity();
 
-  // If loading initially AND no city is selected (meaning modal is about to show)
   if (loading && barbearias.length === 0 && isInitialLoad) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -299,37 +327,59 @@ const Home = () => {
     );
   }
 
-  // Show modal if no city selected and data is loaded
-  if (
-    isInitialLoad &&
-    !selectedCity &&
-    barbearias.length > 0 &&
-    availableCities.length > 0
-  ) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <CitySelectorModal
-          open={showLocationModal}
-          onOpenChange={(open) => {
-            if (!open && !selectedCity) {
-              setShowLocationModal(true);
-            } else {
-              setShowLocationModal(open);
-            }
-          }}
-          availableCities={availableCities}
-          selectedCity={selectedCity}
-          handleCitySelect={handleCitySelect}
-          error={error}
-        />
+  const LocationPermissionModal = () => (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1000,
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "#fff",
+          padding: "20px",
+          borderRadius: "8px",
+          maxWidth: "400px",
+          textAlign: "center",
+          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+        }}
+      >
+        <p className="mb-4 text-black">{locationErrorMsg}</p>
+        <div className="flex justify-center gap-4 text-black">
+          <Button onClick={handleChooseManual} variant="secondary" className="">
+            Selecionar cidade manualmente
+          </Button>
+        </div>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
     <div className="min-h-screen">
       <Header />
+
+      {!selectedCity && showLocationModal && <LocationPermissionModal />}
+
+      <CitySelectorModal
+        open={showManualCitySelector}
+        onOpenChange={(open) => {
+          setShowManualCitySelector(open);
+          if (!open && !selectedCity) {
+            setShowLocationModal(true);
+          }
+        }}
+        availableCities={availableCities}
+        selectedCity={selectedCity}
+        handleCitySelect={handleCitySelect}
+      />
 
       <div className="flex flex-col items-center justify-center p-4 pt-8">
         <Input
@@ -349,11 +399,9 @@ const Home = () => {
             {session ? `Olá, ${session.user?.name}` : "Olá, Faça seu Login!"}
           </h2>
           <DataAtual />
-          {selectedCity && (
-            <p className="text-sm font-semibold">
-              Cidade selecionada: {selectedCity}
-            </p>
-          )}
+          <p className="text-sm font-semibold">
+            Cidade selecionada: {selectedCity}
+          </p>
         </div>
       )}
 
@@ -369,7 +417,7 @@ const Home = () => {
                 Tente pesquisar por outro termo ou verificar a ortografia.
               </p>
               <Button
-                onClick={clearSearch}
+                onClick={() => setSearchQuery("")}
                 className="mt-4 bg-blue-600 font-bold text-white hover:bg-blue-700"
               >
                 Limpar pesquisa
