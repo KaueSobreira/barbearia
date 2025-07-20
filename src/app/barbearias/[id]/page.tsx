@@ -39,6 +39,25 @@ const HomeBarbearia = () => {
     }
   }, [barbearia?.id]);
 
+  useEffect(() => {
+    if (barbearia?.id && barbearia?.nome) {
+      const slug = barbearia.nome
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      const currentPath = window.location.pathname;
+      const expectedPath = `/barbearias/${barbearia.id}`;
+
+      if (currentPath === expectedPath) {
+        const newUrl = `/barbearias/${slug}`;
+        window.history.replaceState(null, "", newUrl);
+      }
+    }
+  }, [barbearia]);
+
   const loadBarbearia = async () => {
     try {
       setLoading(true);

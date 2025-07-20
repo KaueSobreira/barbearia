@@ -1,4 +1,3 @@
-// app/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -14,7 +13,6 @@ import { Barbearia } from "@/lib/model/barbearia";
 import { useSession } from "next-auth/react";
 import DataAtual from "./_components/date_dinamic";
 
-// Import the new components
 import CitySelectorModal from "./_components/CitySelectorModal";
 import BarbershopCarousel from "./_components/BarbershopCarousel";
 import ErrorAlert from "./_components/ErrorAlert";
@@ -47,14 +45,13 @@ const Home = () => {
   const initialSearchQuery = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
 
-  // Removed userCity state
   const [selectedCity, setSelectedCity] = useState<string | null>(
     getCityFromLocalStorage(),
   );
 
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
-  // isInitialLoad will now only check if a city has been selected at all
+
   const [isInitialLoad, setIsInitialLoad] = useState(
     getCityFromLocalStorage() === null,
   );
@@ -65,21 +62,6 @@ const Home = () => {
   const topRatedScrollRef = useRef<HTMLDivElement>(null);
   const allBarbeariasScrollRef = useRef<HTMLDivElement>(null);
   const searchResultsScrollRef = useRef<HTMLDivElement>(null);
-
-  // No longer needed since we're not doing reverse geocoding
-  // const extractCityFromNominatimResponse = (data: any): string | null => {
-  //   if (data && data.address) {
-  //     return (
-  //       data.address.city ||
-  //       data.address.town ||
-  //       data.address.village ||
-  //       data.address.county ||
-  //       data.address.suburb ||
-  //       null
-  //     );
-  // }
-  //   return null;
-  // };
 
   const loadBarbearias = useCallback(async () => {
     try {
@@ -105,36 +87,82 @@ const Home = () => {
       }
       setBarbearias([]);
       setFilteredBarbeariasBySearch([]);
-      setShowLocationModal(false); // Still good to close if there's a load error
+      setShowLocationModal(false);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Removed getUserLocationAndFilter function completely
+  // Função para pegar a localização do usuário e extrair cidade pelo Nominatim
+  const getCityFromUserLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      console.log("Geolocalização não suportada pelo navegador.");
+      setShowLocationModal(true);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+          );
+          const data = await response.json();
+
+          const city =
+            data.address.city ||
+            data.address.town ||
+            data.address.village ||
+            data.address.county ||
+            null;
+
+          if (city) {
+            setSelectedCity(city);
+            saveCityToLocalStorage(city);
+            setIsInitialLoad(false);
+            setShowLocationModal(false);
+          } else {
+            // Se não achou a cidade, abrir modal para o usuário escolher manualmente
+            setShowLocationModal(true);
+          }
+        } catch (error) {
+          console.error("Erro ao consultar Nominatim:", error);
+          setShowLocationModal(true);
+        }
+      },
+      (error) => {
+        console.error("Erro ao obter localização:", error.message);
+        setShowLocationModal(true);
+      },
+      { timeout: 10000 },
+    );
+  }, []);
 
   useEffect(() => {
     loadFavorites();
     loadBarbearias();
   }, [loadBarbearias]);
 
-  // Modified useEffect to always show CitySelectorModal if no city is selected
+  // Após carregar as barbearias, tenta pegar a localização do usuário se não tiver cidade salva
   useEffect(() => {
     if (
       !loading &&
       barbearias.length > 0 &&
       availableCities.length > 0 &&
-      !selectedCity && // Check only selectedCity
+      !selectedCity &&
       isInitialLoad
     ) {
-      setShowLocationModal(true);
+      getCityFromUserLocation();
     }
   }, [
     loading,
     barbearias.length,
     availableCities.length,
-    selectedCity, // Only selectedCity here
+    selectedCity,
     isInitialLoad,
+    getCityFromUserLocation,
   ]);
 
   useEffect(() => {
@@ -151,7 +179,7 @@ const Home = () => {
     }
 
     if (hasActiveSearch) {
-      const currentCity = selectedCity; // Removed userCity
+      const currentCity = selectedCity;
       const filtered = barbearias.filter(
         (barbearia) =>
           (currentCity
@@ -173,7 +201,7 @@ const Home = () => {
     } else {
       setFilteredBarbeariasBySearch([]);
     }
-  }, [searchQuery, hasActiveSearch, barbearias, selectedCity]); // Removed userCity from dependencies
+  }, [searchQuery, hasActiveSearch, barbearias, selectedCity]);
 
   const loadFavorites = () => {
     try {
@@ -219,7 +247,7 @@ const Home = () => {
   };
 
   const getBarbeariasByCurrentCity = (): Barbearia[] => {
-    const cityToFilterBy = selectedCity; // Removed userCity
+    const cityToFilterBy = selectedCity;
     if (!cityToFilterBy) {
       return [];
     }
@@ -242,14 +270,13 @@ const Home = () => {
 
   const handleCitySelect = (city: string) => {
     setSelectedCity(city);
-    // Removed setUserCity(null); as userCity is gone
     saveCityToLocalStorage(city);
     setSearchQuery("");
     setShowLocationModal(false);
     setIsInitialLoad(false);
   };
-  const [hasMounted, setHasMounted] = useState(false);
 
+  const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
     setHasMounted(true);
   }, []);
@@ -272,7 +299,7 @@ const Home = () => {
     );
   }
 
-  // Always show the modal if no city is selected and data is loaded
+  // Show modal if no city selected and data is loaded
   if (
     isInitialLoad &&
     !selectedCity &&
@@ -286,7 +313,6 @@ const Home = () => {
           open={showLocationModal}
           onOpenChange={(open) => {
             if (!open && !selectedCity) {
-              // Only check selectedCity
               setShowLocationModal(true);
             } else {
               setShowLocationModal(open);
@@ -295,7 +321,7 @@ const Home = () => {
           availableCities={availableCities}
           selectedCity={selectedCity}
           handleCitySelect={handleCitySelect}
-          error={error} // This error would be from initial barbearia load, not geolocation
+          error={error}
         />
       </div>
     );
@@ -311,27 +337,25 @@ const Home = () => {
           placeholder="Pesquisar barbearia ou cidade..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          disabled={!selectedCity} // Enabled only when a city is selected
+          disabled={!selectedCity}
         />
       </div>
 
       {error && <ErrorAlert message={error} />}
 
-      {!hasActiveSearch &&
-        selectedCity && ( // Only check selectedCity
-          <div className="pb-5 pl-10 font-bold text-gray-300">
-            <h2 className="font-bold">
-              {session ? `Olá, ${session.user?.name}` : "Olá, Faça seu Login!"}
-            </h2>
-            <DataAtual />
-            {/* Removed userCity display */}
-            {selectedCity && (
-              <p className="text-sm font-semibold">
-                Cidade selecionada: {selectedCity}
-              </p>
-            )}
-          </div>
-        )}
+      {!hasActiveSearch && selectedCity && (
+        <div className="pb-5 pl-10 font-bold text-gray-300">
+          <h2 className="font-bold">
+            {session ? `Olá, ${session.user?.name}` : "Olá, Faça seu Login!"}
+          </h2>
+          <DataAtual />
+          {selectedCity && (
+            <p className="text-sm font-semibold">
+              Cidade selecionada: {selectedCity}
+            </p>
+          )}
+        </div>
+      )}
 
       {hasActiveSearch &&
         (filteredBarbeariasBySearch.length === 0 ? (
@@ -362,40 +386,39 @@ const Home = () => {
           />
         ))}
 
-      {!hasActiveSearch &&
-        selectedCity && ( // Only check selectedCity
-          <>
-            {favoriteShops.length > 0 && (
-              <BarbershopCarousel
-                shops={favoriteShops}
-                title="Meus Favoritos"
-                scrollRef={favoriteScrollRef}
-                favorites={favorites}
-                toggleFavorite={toggleFavorite}
-              />
-            )}
+      {!hasActiveSearch && selectedCity && (
+        <>
+          {favoriteShops.length > 0 && (
+            <BarbershopCarousel
+              shops={favoriteShops}
+              title="Meus Favoritos"
+              scrollRef={favoriteScrollRef}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
+            />
+          )}
 
-            {barbeariasInCurrentCity.length > 0 && (
-              <BarbershopCarousel
-                shops={barbeariasInCurrentCity}
-                title={`Todas as Barbearias em ${selectedCity}`}
-                scrollRef={allBarbeariasScrollRef}
-                favorites={favorites}
-                toggleFavorite={toggleFavorite}
-              />
-            )}
+          {barbeariasInCurrentCity.length > 0 && (
+            <BarbershopCarousel
+              shops={barbeariasInCurrentCity}
+              title={`Todas as Barbearias em ${selectedCity}`}
+              scrollRef={allBarbeariasScrollRef}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
+            />
+          )}
 
-            {topRatedShopsInCurrentCity.length > 0 && (
-              <BarbershopCarousel
-                shops={topRatedShopsInCurrentCity}
-                title={`Melhores Avaliados em ${selectedCity}`}
-                scrollRef={topRatedScrollRef}
-                favorites={favorites}
-                toggleFavorite={toggleFavorite}
-              />
-            )}
-          </>
-        )}
+          {topRatedShopsInCurrentCity.length > 0 && (
+            <BarbershopCarousel
+              shops={topRatedShopsInCurrentCity}
+              title={`Melhores Avaliados em ${selectedCity}`}
+              scrollRef={topRatedScrollRef}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
+            />
+          )}
+        </>
+      )}
 
       {!hasActiveSearch && !selectedCity && (
         <div className="mt-20 text-center text-gray-500"></div>
