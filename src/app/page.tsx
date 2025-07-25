@@ -16,6 +16,7 @@ import DataAtual from "./_components/date_dinamic";
 import CitySelectorModal from "./_components/CitySelectorModal";
 import BarbershopCarousel from "./_components/BarbershopCarousel";
 import ErrorAlert from "./_components/ErrorAlert";
+import VerificaCadastro from "./_components/VerificaCadastro";
 
 const CITY_STORAGE_KEY = "user_selected_city";
 
@@ -364,6 +365,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
+      <VerificaCadastro />
       <Header />
 
       {!selectedCity && showLocationModal && <LocationPermissionModal />}
